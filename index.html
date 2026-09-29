@@ -3,2180 +3,3018 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>샌드위치 매매법 엔진 탭</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="샌드위치 매매">
+<title>샌드위치 매매법</title>
 <style>
 :root {
-  --bg:#f5f7fb; --card:#ffffff; --text:#111827; --muted:#6b7280;
-  --line:#e5e7eb; --buy:#0f62fe; --sell:#0f9d58; --accent:#f59e0b;
+  --bg:#f5f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --buy:#0f62fe; --sell:#0f9d58; --accent:#f59e0b; --violet:#7c3aed;
+  --soft:#f9fafb; --good:#047857; --warn:#b45309;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:14px}
-.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.wrap{max-width:1120px;margin:0 auto;padding:14px}
+.hero,.growth{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
 h1{margin:0;font-size:25px} .sub{margin-top:6px;color:var(--muted);font-size:13px}
 .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-.sum{background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px}
-.sum span{display:block;color:var(--muted);font-size:12px;margin-bottom:4px} .sum strong{font-size:20px}
+.sum{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
+.sum span,.metric-label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
+.sum strong{font-size:20px}
+.good{color:var(--good)} .warn{color:var(--warn)}
+
+.alloc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.alloc-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.alloc-title{font-weight:800;font-size:12px;color:var(--muted)}
+.alloc-target{font-weight:900;font-size:18px;margin-top:3px;color:var(--violet)}
+.alloc-next{font-size:11px;color:var(--muted);margin-top:4px}
+.alloc-range{font-size:11px;color:var(--muted);margin-top:3px}
+
+.growth-title{font-size:18px;font-weight:900}
+.entry-grid{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:10px;margin-top:12px}
+.gbox{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
+.gbox input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;background:#fff}
+.btn{width:100%;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:800;cursor:pointer}
+.btn-primary{background:var(--accent);color:#111827}
+.btn-secondary{background:#e5e7eb;color:#111827}
+.btn-danger{background:#fee2e2;color:#991b1b}
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.gvalue{font-size:20px;font-weight:900}
+.progress{height:11px;border-radius:999px;background:#e5e7eb;overflow:hidden;margin-top:10px}
+.progress > div{height:100%;width:0;background:var(--accent);transition:width .2s}
+.progress-text{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
+.rule{font-size:12px;color:var(--muted);line-height:1.65;margin-top:10px}
+.flash{margin-top:10px;padding:10px 12px;border-radius:10px;background:#ecfdf5;color:#065f46;font-size:13px;display:none}
 
 input[type="radio"]{position:absolute;opacity:0;pointer-events:none}
 .tabs{display:flex;gap:8px;overflow-x:auto;margin:14px 0 12px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.tabs label{
-  display:block;min-width:70px;text-align:center;padding:12px 16px;border-radius:999px;
-  background:#fff;border:1px solid var(--line);font-weight:800;cursor:pointer;
-  user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-}
+.tabs label{display:block;min-width:70px;text-align:center;padding:12px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:800;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .panels .panel{display:none}
 #tab1:checked ~ .tabs label[for="tab1"]{background:var(--accent);color:#111827;border-color:var(--accent)}#tab1:checked ~ .panels .panel-1{display:block}#tab2:checked ~ .tabs label[for="tab2"]{background:var(--accent);color:#111827;border-color:var(--accent)}#tab2:checked ~ .panels .panel-2{display:block}#tab3:checked ~ .tabs label[for="tab3"]{background:var(--accent);color:#111827;border-color:var(--accent)}#tab3:checked ~ .panels .panel-3{display:block}#tab4:checked ~ .tabs label[for="tab4"]{background:var(--accent);color:#111827;border-color:var(--accent)}#tab4:checked ~ .panels .panel-4{display:block}#tab5:checked ~ .tabs label[for="tab5"]{background:var(--accent);color:#111827;border-color:var(--accent)}#tab5:checked ~ .panels .panel-5{display:block}
 
 .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
 .engine-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
 .eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
-h2{margin:3px 0 0;font-size:21px}
+.engine-head h2{margin:3px 0 0;font-size:21px}
 .engine-stats{display:flex;gap:8px;flex-wrap:wrap}
-.engine-stats div{background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.engine-stats div{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .engine-stats span{display:block;font-size:10px;color:var(--muted)} .engine-stats strong{font-size:14px}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;min-width:720px;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:790px;background:#fff}
 th,td{padding:10px 9px;border-bottom:1px solid var(--line);font-size:13px;text-align:right;white-space:nowrap}
 th{background:#f3f4f6;color:#374151;position:sticky;top:0}
 th:first-child,td:first-child{text-align:center}
-.buy{color:var(--buy);font-weight:800;font-size:14px}
-.sell{color:var(--sell);font-weight:800;font-size:14px}
-.qty{font-weight:800} .profit{color:#047857;font-weight:700} .pct{color:#6b7280}
+.buy{color:var(--buy);font-weight:800;font-size:14px} .sell{color:var(--sell);font-weight:800;font-size:14px}
+.qty{font-weight:800} .target{font-weight:700;color:var(--violet)} .profit{color:var(--good);font-weight:700} .pct{color:#6b7280}
 tbody tr:nth-child(5n) td{border-bottom:2px solid #cbd5e1}
-.note{color:var(--muted);font-size:12px;line-height:1.6;padding:10px 4px 20px}
-@media(max-width:700px){
+.note{color:var(--muted);font-size:12px;line-height:1.65;padding:10px 4px 20px}
+
+@media(max-width:760px){
   .summary{grid-template-columns:1fr 1fr}
-  .sum strong{font-size:18px}
-  table{min-width:640px}
+  .alloc-grid{grid-template-columns:repeat(2,1fr)}
+  .entry-grid{grid-template-columns:1fr}
+  .status-grid{grid-template-columns:1fr 1fr}
+  .sum strong,.gvalue{font-size:18px}
+  table{min-width:720px}
   th,td{padding:9px 7px;font-size:12px}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
+
 <section class="hero">
   <h1>샌드위치 매매표</h1>
-  <div class="sub">E1~E5를 터치해서 전환 · 250세트 · +6% 익절</div>
+  <div class="sub">5엔진 · 250세트 · 공격 가변형 · +6% 익절 · 실현수익 자동 증액</div>
+
   <div class="summary">
-    <div class="sum"><span>총 투자금</span><strong>$80,000</strong></div>
-    <div class="sum"><span>총 배정금액</span><strong>$79,608</strong></div>
-    <div class="sum"><span>잔여 현금</span><strong>$392</strong></div>
-    <div class="sum"><span>전체 1회전 이익</span><strong>$4,776</strong></div>
+    <div class="sum"><span>현재 전략자금</span><strong id="currentCapital">$80,000</strong></div>
+    <div class="sum"><span>실제 정수주 배정</span><strong id="actualAllocated">-</strong></div>
+    <div class="sum"><span>현재 리저브</span><strong id="reserveCash" class="good">-</strong></div>
+    <div class="sum"><span>증액 단계</span><strong id="stepValue">0단계</strong></div>
+  </div>
+
+  <div class="alloc-grid">
+<div class="alloc-card">
+  <div class="alloc-title">E1</div>
+  <div class="alloc-target" id="alloc1">$280</div>
+  <div class="alloc-next">다음 단계 <span id="nextAlloc1">-</span></div>
+  <div class="alloc-range">$278.00 → $139.00</div>
+</div>
+<div class="alloc-card">
+  <div class="alloc-title">E2</div>
+  <div class="alloc-target" id="alloc2">$280</div>
+  <div class="alloc-next">다음 단계 <span id="nextAlloc2">-</span></div>
+  <div class="alloc-range">$139.00 → $69.50</div>
+</div>
+<div class="alloc-card">
+  <div class="alloc-title">E3</div>
+  <div class="alloc-target" id="alloc3">$300</div>
+  <div class="alloc-next">다음 단계 <span id="nextAlloc3">-</span></div>
+  <div class="alloc-range">$69.50 → $34.75</div>
+</div>
+<div class="alloc-card">
+  <div class="alloc-title">E4</div>
+  <div class="alloc-target" id="alloc4">$340</div>
+  <div class="alloc-next">다음 단계 <span id="nextAlloc4">-</span></div>
+  <div class="alloc-range">$34.75 → $17.38</div>
+</div>
+<div class="alloc-card">
+  <div class="alloc-title">E5</div>
+  <div class="alloc-target" id="alloc5">$400</div>
+  <div class="alloc-next">다음 단계 <span id="nextAlloc5">-</span></div>
+  <div class="alloc-range">$17.38 → $8.69</div>
+</div></div>
+</section>
+
+<section class="growth">
+  <div class="growth-title">실현수익 누적 & 자동 증액</div>
+  <div class="sub">이번에 실현된 수익만 입력하고 “수익 추가”를 누르면 누적됩니다. 앱을 닫아도 기기에 저장됩니다.</div>
+
+  <div class="entry-grid">
+    <div class="gbox">
+      <span class="metric-label">이번 실현수익 추가 ($)</span>
+      <input id="profitAdd" type="number" inputmode="decimal" min="0" step="1" placeholder="예: 245.50">
+    </div>
+    <div class="gbox" style="display:flex;align-items:end">
+      <button class="btn btn-primary" id="addProfitBtn">수익 추가</button>
+    </div>
+    <div class="gbox" style="display:flex;align-items:end">
+      <button class="btn btn-danger" id="resetBtn">누적수익 초기화</button>
+    </div>
+  </div>
+
+  <div class="status-grid">
+    <div class="gbox">
+      <span class="metric-label">누적 실현수익</span>
+      <div class="gvalue" id="totalRealized">$0</div>
+    </div>
+    <div class="gbox">
+      <span class="metric-label">다음 단계 누적 기준</span>
+      <div class="gvalue" id="cumulativeThreshold">$8,000</div>
+    </div>
+    <div class="gbox">
+      <span class="metric-label">다음 단계까지</span>
+      <div class="gvalue" id="remainingProfit">$8,000</div>
+    </div>
+    <div class="gbox">
+      <span class="metric-label">다음 전략자금</span>
+      <div class="gvalue" id="nextCapital">$88,000</div>
+    </div>
+  </div>
+
+  <div class="progress"><div id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">0%</div>
+  <div class="flash" id="flashMsg"></div>
+
+  <div class="rule">
+    <b>자동 증액 규칙:</b> 시작은 $80,000입니다. 현재 전략자금의 10%만큼 실현수익이 쌓일 때마다 전략자금을 10% 올립니다.
+    기준을 넘고 남은 초과수익은 다음 단계 진행률로 자동 이월합니다. 평가이익은 계산에 포함하지 않습니다.
   </div>
 </section>
 
 <input type="radio" name="engine" id="tab1" checked><input type="radio" name="engine" id="tab2" ><input type="radio" name="engine" id="tab3" ><input type="radio" name="engine" id="tab4" ><input type="radio" name="engine" id="tab5" >
 <div class="tabs"><label for="tab1">E1</label><label for="tab2">E2</label><label for="tab3">E3</label><label for="tab4">E4</label><label for="tab5">E5</label></div>
-
 <div class="panels">
 <div class="panel panel-1">
-<div class="engine-head">
-  <div>
-    <div class="eyebrow">ENGINE 1</div>
-    <h2>$278.0000 → $139.0000</h2>
+  <div class="engine-head">
+    <div>
+      <div class="eyebrow">ENGINE 1</div>
+      <h2>$278.0000 → $139.0000</h2>
+    </div>
+    <div class="engine-stats">
+      <div><span>현재 목표금액</span><strong id="engBudget1">-</strong></div>
+      <div><span>엔진 실제투입</span><strong id="engActual1">-</strong></div>
+      <div><span>남는 현금</span><strong id="engReserve1">-</strong></div>
+      <div><span>1회전 예상이익</span><strong id="engProfit1">-</strong></div>
+    </div>
   </div>
-  <div class="engine-stats">
-    <div><span>세트당</span><strong>2주</strong></div>
-    <div><span>총투입</span><strong>$20,711</strong></div>
-    <div><span>1회전 이익</span><strong>$1,243</strong></div>
-  </div>
-</div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>세트</th><th>매수가</th><th>직전대비</th><th>수량</th><th>매수금액</th><th>매도가 +6%</th><th>예상이익</th></tr>
-</thead>
-<tbody><tr>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th>
+          <th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr data-engine="1" data-buy="275.22000000">
 <td>1</td>
 <td class="buy">$275.2200</td>
 <td class="pct">-1.000%</td>
-<td class="qty">2주</td>
-<td class="amt">$550.44</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$291.7332</td>
-<td class="profit">$33.03</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="272.44000000">
 <td>2</td>
 <td class="buy">$272.4400</td>
 <td class="pct">-1.010%</td>
-<td class="qty">2주</td>
-<td class="amt">$544.88</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$288.7864</td>
-<td class="profit">$32.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="269.66000000">
 <td>3</td>
 <td class="buy">$269.6600</td>
 <td class="pct">-1.020%</td>
-<td class="qty">2주</td>
-<td class="amt">$539.32</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$285.8396</td>
-<td class="profit">$32.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="266.88000000">
 <td>4</td>
 <td class="buy">$266.8800</td>
 <td class="pct">-1.031%</td>
-<td class="qty">2주</td>
-<td class="amt">$533.76</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$282.8928</td>
-<td class="profit">$32.03</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="264.10000000">
 <td>5</td>
 <td class="buy">$264.1000</td>
 <td class="pct">-1.042%</td>
-<td class="qty">2주</td>
-<td class="amt">$528.20</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$279.9460</td>
-<td class="profit">$31.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="261.32000000">
 <td>6</td>
 <td class="buy">$261.3200</td>
 <td class="pct">-1.053%</td>
-<td class="qty">2주</td>
-<td class="amt">$522.64</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$276.9992</td>
-<td class="profit">$31.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="258.54000000">
 <td>7</td>
 <td class="buy">$258.5400</td>
 <td class="pct">-1.064%</td>
-<td class="qty">2주</td>
-<td class="amt">$517.08</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$274.0524</td>
-<td class="profit">$31.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="255.76000000">
 <td>8</td>
 <td class="buy">$255.7600</td>
 <td class="pct">-1.075%</td>
-<td class="qty">2주</td>
-<td class="amt">$511.52</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$271.1056</td>
-<td class="profit">$30.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="252.98000000">
 <td>9</td>
 <td class="buy">$252.9800</td>
 <td class="pct">-1.087%</td>
-<td class="qty">2주</td>
-<td class="amt">$505.96</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$268.1588</td>
-<td class="profit">$30.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="250.20000000">
 <td>10</td>
 <td class="buy">$250.2000</td>
 <td class="pct">-1.099%</td>
-<td class="qty">2주</td>
-<td class="amt">$500.40</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$265.2120</td>
-<td class="profit">$30.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="247.42000000">
 <td>11</td>
 <td class="buy">$247.4200</td>
 <td class="pct">-1.111%</td>
-<td class="qty">2주</td>
-<td class="amt">$494.84</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$262.2652</td>
-<td class="profit">$29.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="244.64000000">
 <td>12</td>
 <td class="buy">$244.6400</td>
 <td class="pct">-1.124%</td>
-<td class="qty">2주</td>
-<td class="amt">$489.28</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$259.3184</td>
-<td class="profit">$29.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="241.86000000">
 <td>13</td>
 <td class="buy">$241.8600</td>
 <td class="pct">-1.136%</td>
-<td class="qty">2주</td>
-<td class="amt">$483.72</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$256.3716</td>
-<td class="profit">$29.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="239.08000000">
 <td>14</td>
 <td class="buy">$239.0800</td>
 <td class="pct">-1.149%</td>
-<td class="qty">2주</td>
-<td class="amt">$478.16</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$253.4248</td>
-<td class="profit">$28.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="236.30000000">
 <td>15</td>
 <td class="buy">$236.3000</td>
 <td class="pct">-1.163%</td>
-<td class="qty">2주</td>
-<td class="amt">$472.60</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$250.4780</td>
-<td class="profit">$28.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="233.52000000">
 <td>16</td>
 <td class="buy">$233.5200</td>
 <td class="pct">-1.176%</td>
-<td class="qty">2주</td>
-<td class="amt">$467.04</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$247.5312</td>
-<td class="profit">$28.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="230.74000000">
 <td>17</td>
 <td class="buy">$230.7400</td>
 <td class="pct">-1.190%</td>
-<td class="qty">2주</td>
-<td class="amt">$461.48</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$244.5844</td>
-<td class="profit">$27.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="227.96000000">
 <td>18</td>
 <td class="buy">$227.9600</td>
 <td class="pct">-1.205%</td>
-<td class="qty">2주</td>
-<td class="amt">$455.92</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$241.6376</td>
-<td class="profit">$27.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="225.18000000">
 <td>19</td>
 <td class="buy">$225.1800</td>
 <td class="pct">-1.220%</td>
-<td class="qty">2주</td>
-<td class="amt">$450.36</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$238.6908</td>
-<td class="profit">$27.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="222.40000000">
 <td>20</td>
 <td class="buy">$222.4000</td>
 <td class="pct">-1.235%</td>
-<td class="qty">2주</td>
-<td class="amt">$444.80</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$235.7440</td>
-<td class="profit">$26.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="219.62000000">
 <td>21</td>
 <td class="buy">$219.6200</td>
 <td class="pct">-1.250%</td>
-<td class="qty">2주</td>
-<td class="amt">$439.24</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$232.7972</td>
-<td class="profit">$26.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="216.84000000">
 <td>22</td>
 <td class="buy">$216.8400</td>
 <td class="pct">-1.266%</td>
-<td class="qty">2주</td>
-<td class="amt">$433.68</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$229.8504</td>
-<td class="profit">$26.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="214.06000000">
 <td>23</td>
 <td class="buy">$214.0600</td>
 <td class="pct">-1.282%</td>
-<td class="qty">2주</td>
-<td class="amt">$428.12</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$226.9036</td>
-<td class="profit">$25.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="211.28000000">
 <td>24</td>
 <td class="buy">$211.2800</td>
 <td class="pct">-1.299%</td>
-<td class="qty">2주</td>
-<td class="amt">$422.56</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$223.9568</td>
-<td class="profit">$25.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="208.50000000">
 <td>25</td>
 <td class="buy">$208.5000</td>
 <td class="pct">-1.316%</td>
-<td class="qty">2주</td>
-<td class="amt">$417.00</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$221.0100</td>
-<td class="profit">$25.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="205.72000000">
 <td>26</td>
 <td class="buy">$205.7200</td>
 <td class="pct">-1.333%</td>
-<td class="qty">2주</td>
-<td class="amt">$411.44</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$218.0632</td>
-<td class="profit">$24.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="202.94000000">
 <td>27</td>
 <td class="buy">$202.9400</td>
 <td class="pct">-1.351%</td>
-<td class="qty">2주</td>
-<td class="amt">$405.88</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$215.1164</td>
-<td class="profit">$24.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="200.16000000">
 <td>28</td>
 <td class="buy">$200.1600</td>
 <td class="pct">-1.370%</td>
-<td class="qty">2주</td>
-<td class="amt">$400.32</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$212.1696</td>
-<td class="profit">$24.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="197.38000000">
 <td>29</td>
 <td class="buy">$197.3800</td>
 <td class="pct">-1.389%</td>
-<td class="qty">2주</td>
-<td class="amt">$394.76</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$209.2228</td>
-<td class="profit">$23.69</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="194.60000000">
 <td>30</td>
 <td class="buy">$194.6000</td>
 <td class="pct">-1.408%</td>
-<td class="qty">2주</td>
-<td class="amt">$389.20</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$206.2760</td>
-<td class="profit">$23.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="191.82000000">
 <td>31</td>
 <td class="buy">$191.8200</td>
 <td class="pct">-1.429%</td>
-<td class="qty">2주</td>
-<td class="amt">$383.64</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$203.3292</td>
-<td class="profit">$23.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="189.04000000">
 <td>32</td>
 <td class="buy">$189.0400</td>
 <td class="pct">-1.449%</td>
-<td class="qty">2주</td>
-<td class="amt">$378.08</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$200.3824</td>
-<td class="profit">$22.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="186.26000000">
 <td>33</td>
 <td class="buy">$186.2600</td>
 <td class="pct">-1.471%</td>
-<td class="qty">2주</td>
-<td class="amt">$372.52</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$197.4356</td>
-<td class="profit">$22.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="183.48000000">
 <td>34</td>
 <td class="buy">$183.4800</td>
 <td class="pct">-1.493%</td>
-<td class="qty">2주</td>
-<td class="amt">$366.96</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$194.4888</td>
-<td class="profit">$22.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="180.70000000">
 <td>35</td>
 <td class="buy">$180.7000</td>
 <td class="pct">-1.515%</td>
-<td class="qty">2주</td>
-<td class="amt">$361.40</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$191.5420</td>
-<td class="profit">$21.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="177.92000000">
 <td>36</td>
 <td class="buy">$177.9200</td>
 <td class="pct">-1.538%</td>
-<td class="qty">2주</td>
-<td class="amt">$355.84</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$188.5952</td>
-<td class="profit">$21.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="175.14000000">
 <td>37</td>
 <td class="buy">$175.1400</td>
 <td class="pct">-1.562%</td>
-<td class="qty">2주</td>
-<td class="amt">$350.28</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$185.6484</td>
-<td class="profit">$21.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="172.36000000">
 <td>38</td>
 <td class="buy">$172.3600</td>
 <td class="pct">-1.587%</td>
-<td class="qty">2주</td>
-<td class="amt">$344.72</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$182.7016</td>
-<td class="profit">$20.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="169.58000000">
 <td>39</td>
 <td class="buy">$169.5800</td>
 <td class="pct">-1.613%</td>
-<td class="qty">2주</td>
-<td class="amt">$339.16</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$179.7548</td>
-<td class="profit">$20.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="166.80000000">
 <td>40</td>
 <td class="buy">$166.8000</td>
 <td class="pct">-1.639%</td>
-<td class="qty">2주</td>
-<td class="amt">$333.60</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$176.8080</td>
-<td class="profit">$20.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="164.02000000">
 <td>41</td>
 <td class="buy">$164.0200</td>
 <td class="pct">-1.667%</td>
-<td class="qty">2주</td>
-<td class="amt">$328.04</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$173.8612</td>
-<td class="profit">$19.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="161.24000000">
 <td>42</td>
 <td class="buy">$161.2400</td>
 <td class="pct">-1.695%</td>
-<td class="qty">2주</td>
-<td class="amt">$322.48</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$170.9144</td>
-<td class="profit">$19.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="158.46000000">
 <td>43</td>
 <td class="buy">$158.4600</td>
 <td class="pct">-1.724%</td>
-<td class="qty">2주</td>
-<td class="amt">$316.92</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$167.9676</td>
-<td class="profit">$19.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="155.68000000">
 <td>44</td>
 <td class="buy">$155.6800</td>
 <td class="pct">-1.754%</td>
-<td class="qty">2주</td>
-<td class="amt">$311.36</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$165.0208</td>
-<td class="profit">$18.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="152.90000000">
 <td>45</td>
 <td class="buy">$152.9000</td>
 <td class="pct">-1.786%</td>
-<td class="qty">2주</td>
-<td class="amt">$305.80</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$162.0740</td>
-<td class="profit">$18.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="150.12000000">
 <td>46</td>
 <td class="buy">$150.1200</td>
 <td class="pct">-1.818%</td>
-<td class="qty">2주</td>
-<td class="amt">$300.24</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$159.1272</td>
-<td class="profit">$18.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="147.34000000">
 <td>47</td>
 <td class="buy">$147.3400</td>
 <td class="pct">-1.852%</td>
-<td class="qty">2주</td>
-<td class="amt">$294.68</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$156.1804</td>
-<td class="profit">$17.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="144.56000000">
 <td>48</td>
 <td class="buy">$144.5600</td>
 <td class="pct">-1.887%</td>
-<td class="qty">2주</td>
-<td class="amt">$289.12</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$153.2336</td>
-<td class="profit">$17.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="141.78000000">
 <td>49</td>
 <td class="buy">$141.7800</td>
 <td class="pct">-1.923%</td>
-<td class="qty">2주</td>
-<td class="amt">$283.56</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$150.2868</td>
-<td class="profit">$17.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="1" data-buy="139.00000000">
 <td>50</td>
 <td class="buy">$139.0000</td>
 <td class="pct">-1.961%</td>
-<td class="qty">2주</td>
-<td class="amt">$278.00</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$147.3400</td>
-<td class="profit">$16.68</td>
+<td class="profit dynamic-profit">-</td>
 </tr></tbody>
-</table>
-</div>
-</div><div class="panel panel-2">
-<div class="engine-head">
-  <div>
-    <div class="eyebrow">ENGINE 2</div>
-    <h2>$139.0000 → $69.5000</h2>
-  </div>
-  <div class="engine-stats">
-    <div><span>세트당</span><strong>3주</strong></div>
-    <div><span>총투입</span><strong>$15,533</strong></div>
-    <div><span>1회전 이익</span><strong>$932</strong></div>
+    </table>
   </div>
 </div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>세트</th><th>매수가</th><th>직전대비</th><th>수량</th><th>매수금액</th><th>매도가 +6%</th><th>예상이익</th></tr>
-</thead>
-<tbody><tr>
+
+<div class="panel panel-2">
+  <div class="engine-head">
+    <div>
+      <div class="eyebrow">ENGINE 2</div>
+      <h2>$139.0000 → $69.5000</h2>
+    </div>
+    <div class="engine-stats">
+      <div><span>현재 목표금액</span><strong id="engBudget2">-</strong></div>
+      <div><span>엔진 실제투입</span><strong id="engActual2">-</strong></div>
+      <div><span>남는 현금</span><strong id="engReserve2">-</strong></div>
+      <div><span>1회전 예상이익</span><strong id="engProfit2">-</strong></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th>
+          <th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr data-engine="2" data-buy="137.61000000">
 <td>1</td>
 <td class="buy">$137.6100</td>
 <td class="pct">-1.000%</td>
-<td class="qty">3주</td>
-<td class="amt">$412.83</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$145.8666</td>
-<td class="profit">$24.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="136.22000000">
 <td>2</td>
 <td class="buy">$136.2200</td>
 <td class="pct">-1.010%</td>
-<td class="qty">3주</td>
-<td class="amt">$408.66</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$144.3932</td>
-<td class="profit">$24.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="134.83000000">
 <td>3</td>
 <td class="buy">$134.8300</td>
 <td class="pct">-1.020%</td>
-<td class="qty">3주</td>
-<td class="amt">$404.49</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$142.9198</td>
-<td class="profit">$24.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="133.44000000">
 <td>4</td>
 <td class="buy">$133.4400</td>
 <td class="pct">-1.031%</td>
-<td class="qty">3주</td>
-<td class="amt">$400.32</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$141.4464</td>
-<td class="profit">$24.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="132.05000000">
 <td>5</td>
 <td class="buy">$132.0500</td>
 <td class="pct">-1.042%</td>
-<td class="qty">3주</td>
-<td class="amt">$396.15</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$139.9730</td>
-<td class="profit">$23.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="130.66000000">
 <td>6</td>
 <td class="buy">$130.6600</td>
 <td class="pct">-1.053%</td>
-<td class="qty">3주</td>
-<td class="amt">$391.98</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$138.4996</td>
-<td class="profit">$23.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="129.27000000">
 <td>7</td>
 <td class="buy">$129.2700</td>
 <td class="pct">-1.064%</td>
-<td class="qty">3주</td>
-<td class="amt">$387.81</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$137.0262</td>
-<td class="profit">$23.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="127.88000000">
 <td>8</td>
 <td class="buy">$127.8800</td>
 <td class="pct">-1.075%</td>
-<td class="qty">3주</td>
-<td class="amt">$383.64</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$135.5528</td>
-<td class="profit">$23.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="126.49000000">
 <td>9</td>
 <td class="buy">$126.4900</td>
 <td class="pct">-1.087%</td>
-<td class="qty">3주</td>
-<td class="amt">$379.47</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$134.0794</td>
-<td class="profit">$22.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="125.10000000">
 <td>10</td>
 <td class="buy">$125.1000</td>
 <td class="pct">-1.099%</td>
-<td class="qty">3주</td>
-<td class="amt">$375.30</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$132.6060</td>
-<td class="profit">$22.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="123.71000000">
 <td>11</td>
 <td class="buy">$123.7100</td>
 <td class="pct">-1.111%</td>
-<td class="qty">3주</td>
-<td class="amt">$371.13</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$131.1326</td>
-<td class="profit">$22.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="122.32000000">
 <td>12</td>
 <td class="buy">$122.3200</td>
 <td class="pct">-1.124%</td>
-<td class="qty">3주</td>
-<td class="amt">$366.96</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$129.6592</td>
-<td class="profit">$22.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="120.93000000">
 <td>13</td>
 <td class="buy">$120.9300</td>
 <td class="pct">-1.136%</td>
-<td class="qty">3주</td>
-<td class="amt">$362.79</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$128.1858</td>
-<td class="profit">$21.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="119.54000000">
 <td>14</td>
 <td class="buy">$119.5400</td>
 <td class="pct">-1.149%</td>
-<td class="qty">3주</td>
-<td class="amt">$358.62</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$126.7124</td>
-<td class="profit">$21.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="118.15000000">
 <td>15</td>
 <td class="buy">$118.1500</td>
 <td class="pct">-1.163%</td>
-<td class="qty">3주</td>
-<td class="amt">$354.45</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$125.2390</td>
-<td class="profit">$21.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="116.76000000">
 <td>16</td>
 <td class="buy">$116.7600</td>
 <td class="pct">-1.176%</td>
-<td class="qty">3주</td>
-<td class="amt">$350.28</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$123.7656</td>
-<td class="profit">$21.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="115.37000000">
 <td>17</td>
 <td class="buy">$115.3700</td>
 <td class="pct">-1.190%</td>
-<td class="qty">3주</td>
-<td class="amt">$346.11</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$122.2922</td>
-<td class="profit">$20.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="113.98000000">
 <td>18</td>
 <td class="buy">$113.9800</td>
 <td class="pct">-1.205%</td>
-<td class="qty">3주</td>
-<td class="amt">$341.94</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$120.8188</td>
-<td class="profit">$20.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="112.59000000">
 <td>19</td>
 <td class="buy">$112.5900</td>
 <td class="pct">-1.220%</td>
-<td class="qty">3주</td>
-<td class="amt">$337.77</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$119.3454</td>
-<td class="profit">$20.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="111.20000000">
 <td>20</td>
 <td class="buy">$111.2000</td>
 <td class="pct">-1.235%</td>
-<td class="qty">3주</td>
-<td class="amt">$333.60</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$117.8720</td>
-<td class="profit">$20.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="109.81000000">
 <td>21</td>
 <td class="buy">$109.8100</td>
 <td class="pct">-1.250%</td>
-<td class="qty">3주</td>
-<td class="amt">$329.43</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$116.3986</td>
-<td class="profit">$19.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="108.42000000">
 <td>22</td>
 <td class="buy">$108.4200</td>
 <td class="pct">-1.266%</td>
-<td class="qty">3주</td>
-<td class="amt">$325.26</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$114.9252</td>
-<td class="profit">$19.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="107.03000000">
 <td>23</td>
 <td class="buy">$107.0300</td>
 <td class="pct">-1.282%</td>
-<td class="qty">3주</td>
-<td class="amt">$321.09</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$113.4518</td>
-<td class="profit">$19.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="105.64000000">
 <td>24</td>
 <td class="buy">$105.6400</td>
 <td class="pct">-1.299%</td>
-<td class="qty">3주</td>
-<td class="amt">$316.92</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$111.9784</td>
-<td class="profit">$19.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="104.25000000">
 <td>25</td>
 <td class="buy">$104.2500</td>
 <td class="pct">-1.316%</td>
-<td class="qty">3주</td>
-<td class="amt">$312.75</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$110.5050</td>
-<td class="profit">$18.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="102.86000000">
 <td>26</td>
 <td class="buy">$102.8600</td>
 <td class="pct">-1.333%</td>
-<td class="qty">3주</td>
-<td class="amt">$308.58</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$109.0316</td>
-<td class="profit">$18.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="101.47000000">
 <td>27</td>
 <td class="buy">$101.4700</td>
 <td class="pct">-1.351%</td>
-<td class="qty">3주</td>
-<td class="amt">$304.41</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$107.5582</td>
-<td class="profit">$18.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="100.08000000">
 <td>28</td>
 <td class="buy">$100.0800</td>
 <td class="pct">-1.370%</td>
-<td class="qty">3주</td>
-<td class="amt">$300.24</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$106.0848</td>
-<td class="profit">$18.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="98.69000000">
 <td>29</td>
 <td class="buy">$98.6900</td>
 <td class="pct">-1.389%</td>
-<td class="qty">3주</td>
-<td class="amt">$296.07</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$104.6114</td>
-<td class="profit">$17.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="97.30000000">
 <td>30</td>
 <td class="buy">$97.3000</td>
 <td class="pct">-1.408%</td>
-<td class="qty">3주</td>
-<td class="amt">$291.90</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$103.1380</td>
-<td class="profit">$17.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="95.91000000">
 <td>31</td>
 <td class="buy">$95.9100</td>
 <td class="pct">-1.429%</td>
-<td class="qty">3주</td>
-<td class="amt">$287.73</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$101.6646</td>
-<td class="profit">$17.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="94.52000000">
 <td>32</td>
 <td class="buy">$94.5200</td>
 <td class="pct">-1.449%</td>
-<td class="qty">3주</td>
-<td class="amt">$283.56</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$100.1912</td>
-<td class="profit">$17.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="93.13000000">
 <td>33</td>
 <td class="buy">$93.1300</td>
 <td class="pct">-1.471%</td>
-<td class="qty">3주</td>
-<td class="amt">$279.39</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$98.7178</td>
-<td class="profit">$16.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="91.74000000">
 <td>34</td>
 <td class="buy">$91.7400</td>
 <td class="pct">-1.493%</td>
-<td class="qty">3주</td>
-<td class="amt">$275.22</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$97.2444</td>
-<td class="profit">$16.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="90.35000000">
 <td>35</td>
 <td class="buy">$90.3500</td>
 <td class="pct">-1.515%</td>
-<td class="qty">3주</td>
-<td class="amt">$271.05</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$95.7710</td>
-<td class="profit">$16.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="88.96000000">
 <td>36</td>
 <td class="buy">$88.9600</td>
 <td class="pct">-1.538%</td>
-<td class="qty">3주</td>
-<td class="amt">$266.88</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$94.2976</td>
-<td class="profit">$16.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="87.57000000">
 <td>37</td>
 <td class="buy">$87.5700</td>
 <td class="pct">-1.562%</td>
-<td class="qty">3주</td>
-<td class="amt">$262.71</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$92.8242</td>
-<td class="profit">$15.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="86.18000000">
 <td>38</td>
 <td class="buy">$86.1800</td>
 <td class="pct">-1.587%</td>
-<td class="qty">3주</td>
-<td class="amt">$258.54</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$91.3508</td>
-<td class="profit">$15.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="84.79000000">
 <td>39</td>
 <td class="buy">$84.7900</td>
 <td class="pct">-1.613%</td>
-<td class="qty">3주</td>
-<td class="amt">$254.37</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$89.8774</td>
-<td class="profit">$15.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="83.40000000">
 <td>40</td>
 <td class="buy">$83.4000</td>
 <td class="pct">-1.639%</td>
-<td class="qty">3주</td>
-<td class="amt">$250.20</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$88.4040</td>
-<td class="profit">$15.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="82.01000000">
 <td>41</td>
 <td class="buy">$82.0100</td>
 <td class="pct">-1.667%</td>
-<td class="qty">3주</td>
-<td class="amt">$246.03</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$86.9306</td>
-<td class="profit">$14.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="80.62000000">
 <td>42</td>
 <td class="buy">$80.6200</td>
 <td class="pct">-1.695%</td>
-<td class="qty">3주</td>
-<td class="amt">$241.86</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$85.4572</td>
-<td class="profit">$14.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="79.23000000">
 <td>43</td>
 <td class="buy">$79.2300</td>
 <td class="pct">-1.724%</td>
-<td class="qty">3주</td>
-<td class="amt">$237.69</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$83.9838</td>
-<td class="profit">$14.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="77.84000000">
 <td>44</td>
 <td class="buy">$77.8400</td>
 <td class="pct">-1.754%</td>
-<td class="qty">3주</td>
-<td class="amt">$233.52</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$82.5104</td>
-<td class="profit">$14.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="76.45000000">
 <td>45</td>
 <td class="buy">$76.4500</td>
 <td class="pct">-1.786%</td>
-<td class="qty">3주</td>
-<td class="amt">$229.35</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$81.0370</td>
-<td class="profit">$13.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="75.06000000">
 <td>46</td>
 <td class="buy">$75.0600</td>
 <td class="pct">-1.818%</td>
-<td class="qty">3주</td>
-<td class="amt">$225.18</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$79.5636</td>
-<td class="profit">$13.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="73.67000000">
 <td>47</td>
 <td class="buy">$73.6700</td>
 <td class="pct">-1.852%</td>
-<td class="qty">3주</td>
-<td class="amt">$221.01</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$78.0902</td>
-<td class="profit">$13.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="72.28000000">
 <td>48</td>
 <td class="buy">$72.2800</td>
 <td class="pct">-1.887%</td>
-<td class="qty">3주</td>
-<td class="amt">$216.84</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$76.6168</td>
-<td class="profit">$13.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="70.89000000">
 <td>49</td>
 <td class="buy">$70.8900</td>
 <td class="pct">-1.923%</td>
-<td class="qty">3주</td>
-<td class="amt">$212.67</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$75.1434</td>
-<td class="profit">$12.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="2" data-buy="69.50000000">
 <td>50</td>
 <td class="buy">$69.5000</td>
 <td class="pct">-1.961%</td>
-<td class="qty">3주</td>
-<td class="amt">$208.50</td>
+<td class="target dynamic-budget">$280</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$73.6700</td>
-<td class="profit">$12.51</td>
+<td class="profit dynamic-profit">-</td>
 </tr></tbody>
-</table>
-</div>
-</div><div class="panel panel-3">
-<div class="engine-head">
-  <div>
-    <div class="eyebrow">ENGINE 3</div>
-    <h2>$69.5000 → $34.7500</h2>
-  </div>
-  <div class="engine-stats">
-    <div><span>세트당</span><strong>6주</strong></div>
-    <div><span>총투입</span><strong>$15,533</strong></div>
-    <div><span>1회전 이익</span><strong>$932</strong></div>
+    </table>
   </div>
 </div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>세트</th><th>매수가</th><th>직전대비</th><th>수량</th><th>매수금액</th><th>매도가 +6%</th><th>예상이익</th></tr>
-</thead>
-<tbody><tr>
+
+<div class="panel panel-3">
+  <div class="engine-head">
+    <div>
+      <div class="eyebrow">ENGINE 3</div>
+      <h2>$69.5000 → $34.7500</h2>
+    </div>
+    <div class="engine-stats">
+      <div><span>현재 목표금액</span><strong id="engBudget3">-</strong></div>
+      <div><span>엔진 실제투입</span><strong id="engActual3">-</strong></div>
+      <div><span>남는 현금</span><strong id="engReserve3">-</strong></div>
+      <div><span>1회전 예상이익</span><strong id="engProfit3">-</strong></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th>
+          <th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr data-engine="3" data-buy="68.80500000">
 <td>1</td>
 <td class="buy">$68.8050</td>
 <td class="pct">-1.000%</td>
-<td class="qty">6주</td>
-<td class="amt">$412.83</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$72.9333</td>
-<td class="profit">$24.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="68.11000000">
 <td>2</td>
 <td class="buy">$68.1100</td>
 <td class="pct">-1.010%</td>
-<td class="qty">6주</td>
-<td class="amt">$408.66</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$72.1966</td>
-<td class="profit">$24.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="67.41500000">
 <td>3</td>
 <td class="buy">$67.4150</td>
 <td class="pct">-1.020%</td>
-<td class="qty">6주</td>
-<td class="amt">$404.49</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$71.4599</td>
-<td class="profit">$24.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="66.72000000">
 <td>4</td>
 <td class="buy">$66.7200</td>
 <td class="pct">-1.031%</td>
-<td class="qty">6주</td>
-<td class="amt">$400.32</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$70.7232</td>
-<td class="profit">$24.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="66.02500000">
 <td>5</td>
 <td class="buy">$66.0250</td>
 <td class="pct">-1.042%</td>
-<td class="qty">6주</td>
-<td class="amt">$396.15</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$69.9865</td>
-<td class="profit">$23.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="65.33000000">
 <td>6</td>
 <td class="buy">$65.3300</td>
 <td class="pct">-1.053%</td>
-<td class="qty">6주</td>
-<td class="amt">$391.98</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$69.2498</td>
-<td class="profit">$23.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="64.63500000">
 <td>7</td>
 <td class="buy">$64.6350</td>
 <td class="pct">-1.064%</td>
-<td class="qty">6주</td>
-<td class="amt">$387.81</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$68.5131</td>
-<td class="profit">$23.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="63.94000000">
 <td>8</td>
 <td class="buy">$63.9400</td>
 <td class="pct">-1.075%</td>
-<td class="qty">6주</td>
-<td class="amt">$383.64</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$67.7764</td>
-<td class="profit">$23.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="63.24500000">
 <td>9</td>
 <td class="buy">$63.2450</td>
 <td class="pct">-1.087%</td>
-<td class="qty">6주</td>
-<td class="amt">$379.47</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$67.0397</td>
-<td class="profit">$22.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="62.55000000">
 <td>10</td>
 <td class="buy">$62.5500</td>
 <td class="pct">-1.099%</td>
-<td class="qty">6주</td>
-<td class="amt">$375.30</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$66.3030</td>
-<td class="profit">$22.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="61.85500000">
 <td>11</td>
 <td class="buy">$61.8550</td>
 <td class="pct">-1.111%</td>
-<td class="qty">6주</td>
-<td class="amt">$371.13</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$65.5663</td>
-<td class="profit">$22.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="61.16000000">
 <td>12</td>
 <td class="buy">$61.1600</td>
 <td class="pct">-1.124%</td>
-<td class="qty">6주</td>
-<td class="amt">$366.96</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$64.8296</td>
-<td class="profit">$22.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="60.46500000">
 <td>13</td>
 <td class="buy">$60.4650</td>
 <td class="pct">-1.136%</td>
-<td class="qty">6주</td>
-<td class="amt">$362.79</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$64.0929</td>
-<td class="profit">$21.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="59.77000000">
 <td>14</td>
 <td class="buy">$59.7700</td>
 <td class="pct">-1.149%</td>
-<td class="qty">6주</td>
-<td class="amt">$358.62</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$63.3562</td>
-<td class="profit">$21.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="59.07500000">
 <td>15</td>
 <td class="buy">$59.0750</td>
 <td class="pct">-1.163%</td>
-<td class="qty">6주</td>
-<td class="amt">$354.45</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$62.6195</td>
-<td class="profit">$21.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="58.38000000">
 <td>16</td>
 <td class="buy">$58.3800</td>
 <td class="pct">-1.176%</td>
-<td class="qty">6주</td>
-<td class="amt">$350.28</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$61.8828</td>
-<td class="profit">$21.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="57.68500000">
 <td>17</td>
 <td class="buy">$57.6850</td>
 <td class="pct">-1.190%</td>
-<td class="qty">6주</td>
-<td class="amt">$346.11</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$61.1461</td>
-<td class="profit">$20.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="56.99000000">
 <td>18</td>
 <td class="buy">$56.9900</td>
 <td class="pct">-1.205%</td>
-<td class="qty">6주</td>
-<td class="amt">$341.94</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$60.4094</td>
-<td class="profit">$20.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="56.29500000">
 <td>19</td>
 <td class="buy">$56.2950</td>
 <td class="pct">-1.220%</td>
-<td class="qty">6주</td>
-<td class="amt">$337.77</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$59.6727</td>
-<td class="profit">$20.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="55.60000000">
 <td>20</td>
 <td class="buy">$55.6000</td>
 <td class="pct">-1.235%</td>
-<td class="qty">6주</td>
-<td class="amt">$333.60</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$58.9360</td>
-<td class="profit">$20.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="54.90500000">
 <td>21</td>
 <td class="buy">$54.9050</td>
 <td class="pct">-1.250%</td>
-<td class="qty">6주</td>
-<td class="amt">$329.43</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$58.1993</td>
-<td class="profit">$19.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="54.21000000">
 <td>22</td>
 <td class="buy">$54.2100</td>
 <td class="pct">-1.266%</td>
-<td class="qty">6주</td>
-<td class="amt">$325.26</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$57.4626</td>
-<td class="profit">$19.52</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="53.51500000">
 <td>23</td>
 <td class="buy">$53.5150</td>
 <td class="pct">-1.282%</td>
-<td class="qty">6주</td>
-<td class="amt">$321.09</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$56.7259</td>
-<td class="profit">$19.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="52.82000000">
 <td>24</td>
 <td class="buy">$52.8200</td>
 <td class="pct">-1.299%</td>
-<td class="qty">6주</td>
-<td class="amt">$316.92</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$55.9892</td>
-<td class="profit">$19.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="52.12500000">
 <td>25</td>
 <td class="buy">$52.1250</td>
 <td class="pct">-1.316%</td>
-<td class="qty">6주</td>
-<td class="amt">$312.75</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$55.2525</td>
-<td class="profit">$18.77</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="51.43000000">
 <td>26</td>
 <td class="buy">$51.4300</td>
 <td class="pct">-1.333%</td>
-<td class="qty">6주</td>
-<td class="amt">$308.58</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$54.5158</td>
-<td class="profit">$18.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="50.73500000">
 <td>27</td>
 <td class="buy">$50.7350</td>
 <td class="pct">-1.351%</td>
-<td class="qty">6주</td>
-<td class="amt">$304.41</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$53.7791</td>
-<td class="profit">$18.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="50.04000000">
 <td>28</td>
 <td class="buy">$50.0400</td>
 <td class="pct">-1.370%</td>
-<td class="qty">6주</td>
-<td class="amt">$300.24</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$53.0424</td>
-<td class="profit">$18.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="49.34500000">
 <td>29</td>
 <td class="buy">$49.3450</td>
 <td class="pct">-1.389%</td>
-<td class="qty">6주</td>
-<td class="amt">$296.07</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$52.3057</td>
-<td class="profit">$17.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="48.65000000">
 <td>30</td>
 <td class="buy">$48.6500</td>
 <td class="pct">-1.408%</td>
-<td class="qty">6주</td>
-<td class="amt">$291.90</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$51.5690</td>
-<td class="profit">$17.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="47.95500000">
 <td>31</td>
 <td class="buy">$47.9550</td>
 <td class="pct">-1.429%</td>
-<td class="qty">6주</td>
-<td class="amt">$287.73</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$50.8323</td>
-<td class="profit">$17.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="47.26000000">
 <td>32</td>
 <td class="buy">$47.2600</td>
 <td class="pct">-1.449%</td>
-<td class="qty">6주</td>
-<td class="amt">$283.56</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$50.0956</td>
-<td class="profit">$17.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="46.56500000">
 <td>33</td>
 <td class="buy">$46.5650</td>
 <td class="pct">-1.471%</td>
-<td class="qty">6주</td>
-<td class="amt">$279.39</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$49.3589</td>
-<td class="profit">$16.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="45.87000000">
 <td>34</td>
 <td class="buy">$45.8700</td>
 <td class="pct">-1.493%</td>
-<td class="qty">6주</td>
-<td class="amt">$275.22</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$48.6222</td>
-<td class="profit">$16.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="45.17500000">
 <td>35</td>
 <td class="buy">$45.1750</td>
 <td class="pct">-1.515%</td>
-<td class="qty">6주</td>
-<td class="amt">$271.05</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$47.8855</td>
-<td class="profit">$16.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="44.48000000">
 <td>36</td>
 <td class="buy">$44.4800</td>
 <td class="pct">-1.538%</td>
-<td class="qty">6주</td>
-<td class="amt">$266.88</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$47.1488</td>
-<td class="profit">$16.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="43.78500000">
 <td>37</td>
 <td class="buy">$43.7850</td>
 <td class="pct">-1.562%</td>
-<td class="qty">6주</td>
-<td class="amt">$262.71</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$46.4121</td>
-<td class="profit">$15.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="43.09000000">
 <td>38</td>
 <td class="buy">$43.0900</td>
 <td class="pct">-1.587%</td>
-<td class="qty">6주</td>
-<td class="amt">$258.54</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$45.6754</td>
-<td class="profit">$15.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="42.39500000">
 <td>39</td>
 <td class="buy">$42.3950</td>
 <td class="pct">-1.613%</td>
-<td class="qty">6주</td>
-<td class="amt">$254.37</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$44.9387</td>
-<td class="profit">$15.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="41.70000000">
 <td>40</td>
 <td class="buy">$41.7000</td>
 <td class="pct">-1.639%</td>
-<td class="qty">6주</td>
-<td class="amt">$250.20</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$44.2020</td>
-<td class="profit">$15.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="41.00500000">
 <td>41</td>
 <td class="buy">$41.0050</td>
 <td class="pct">-1.667%</td>
-<td class="qty">6주</td>
-<td class="amt">$246.03</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$43.4653</td>
-<td class="profit">$14.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="40.31000000">
 <td>42</td>
 <td class="buy">$40.3100</td>
 <td class="pct">-1.695%</td>
-<td class="qty">6주</td>
-<td class="amt">$241.86</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$42.7286</td>
-<td class="profit">$14.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="39.61500000">
 <td>43</td>
 <td class="buy">$39.6150</td>
 <td class="pct">-1.724%</td>
-<td class="qty">6주</td>
-<td class="amt">$237.69</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$41.9919</td>
-<td class="profit">$14.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="38.92000000">
 <td>44</td>
 <td class="buy">$38.9200</td>
 <td class="pct">-1.754%</td>
-<td class="qty">6주</td>
-<td class="amt">$233.52</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$41.2552</td>
-<td class="profit">$14.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="38.22500000">
 <td>45</td>
 <td class="buy">$38.2250</td>
 <td class="pct">-1.786%</td>
-<td class="qty">6주</td>
-<td class="amt">$229.35</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$40.5185</td>
-<td class="profit">$13.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="37.53000000">
 <td>46</td>
 <td class="buy">$37.5300</td>
 <td class="pct">-1.818%</td>
-<td class="qty">6주</td>
-<td class="amt">$225.18</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$39.7818</td>
-<td class="profit">$13.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="36.83500000">
 <td>47</td>
 <td class="buy">$36.8350</td>
 <td class="pct">-1.852%</td>
-<td class="qty">6주</td>
-<td class="amt">$221.01</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$39.0451</td>
-<td class="profit">$13.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="36.14000000">
 <td>48</td>
 <td class="buy">$36.1400</td>
 <td class="pct">-1.887%</td>
-<td class="qty">6주</td>
-<td class="amt">$216.84</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$38.3084</td>
-<td class="profit">$13.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="35.44500000">
 <td>49</td>
 <td class="buy">$35.4450</td>
 <td class="pct">-1.923%</td>
-<td class="qty">6주</td>
-<td class="amt">$212.67</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$37.5717</td>
-<td class="profit">$12.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="3" data-buy="34.75000000">
 <td>50</td>
 <td class="buy">$34.7500</td>
 <td class="pct">-1.961%</td>
-<td class="qty">6주</td>
-<td class="amt">$208.50</td>
+<td class="target dynamic-budget">$300</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$36.8350</td>
-<td class="profit">$12.51</td>
+<td class="profit dynamic-profit">-</td>
 </tr></tbody>
-</table>
-</div>
-</div><div class="panel panel-4">
-<div class="engine-head">
-  <div>
-    <div class="eyebrow">ENGINE 4</div>
-    <h2>$34.7500 → $17.3750</h2>
-  </div>
-  <div class="engine-stats">
-    <div><span>세트당</span><strong>11주</strong></div>
-    <div><span>총투입</span><strong>$14,239</strong></div>
-    <div><span>1회전 이익</span><strong>$854</strong></div>
+    </table>
   </div>
 </div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>세트</th><th>매수가</th><th>직전대비</th><th>수량</th><th>매수금액</th><th>매도가 +6%</th><th>예상이익</th></tr>
-</thead>
-<tbody><tr>
+
+<div class="panel panel-4">
+  <div class="engine-head">
+    <div>
+      <div class="eyebrow">ENGINE 4</div>
+      <h2>$34.7500 → $17.3750</h2>
+    </div>
+    <div class="engine-stats">
+      <div><span>현재 목표금액</span><strong id="engBudget4">-</strong></div>
+      <div><span>엔진 실제투입</span><strong id="engActual4">-</strong></div>
+      <div><span>남는 현금</span><strong id="engReserve4">-</strong></div>
+      <div><span>1회전 예상이익</span><strong id="engProfit4">-</strong></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th>
+          <th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr data-engine="4" data-buy="34.40250000">
 <td>1</td>
 <td class="buy">$34.4025</td>
 <td class="pct">-1.000%</td>
-<td class="qty">11주</td>
-<td class="amt">$378.43</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$36.4667</td>
-<td class="profit">$22.71</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="34.05500000">
 <td>2</td>
 <td class="buy">$34.0550</td>
 <td class="pct">-1.010%</td>
-<td class="qty">11주</td>
-<td class="amt">$374.61</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$36.0983</td>
-<td class="profit">$22.48</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="33.70750000">
 <td>3</td>
 <td class="buy">$33.7075</td>
 <td class="pct">-1.020%</td>
-<td class="qty">11주</td>
-<td class="amt">$370.78</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$35.7300</td>
-<td class="profit">$22.25</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="33.36000000">
 <td>4</td>
 <td class="buy">$33.3600</td>
 <td class="pct">-1.031%</td>
-<td class="qty">11주</td>
-<td class="amt">$366.96</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$35.3616</td>
-<td class="profit">$22.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="33.01250000">
 <td>5</td>
 <td class="buy">$33.0125</td>
 <td class="pct">-1.042%</td>
-<td class="qty">11주</td>
-<td class="amt">$363.14</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$34.9933</td>
-<td class="profit">$21.79</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="32.66500000">
 <td>6</td>
 <td class="buy">$32.6650</td>
 <td class="pct">-1.053%</td>
-<td class="qty">11주</td>
-<td class="amt">$359.31</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$34.6249</td>
-<td class="profit">$21.56</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="32.31750000">
 <td>7</td>
 <td class="buy">$32.3175</td>
 <td class="pct">-1.064%</td>
-<td class="qty">11주</td>
-<td class="amt">$355.49</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$34.2566</td>
-<td class="profit">$21.33</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="31.97000000">
 <td>8</td>
 <td class="buy">$31.9700</td>
 <td class="pct">-1.075%</td>
-<td class="qty">11주</td>
-<td class="amt">$351.67</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$33.8882</td>
-<td class="profit">$21.10</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="31.62250000">
 <td>9</td>
 <td class="buy">$31.6225</td>
 <td class="pct">-1.087%</td>
-<td class="qty">11주</td>
-<td class="amt">$347.85</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$33.5198</td>
-<td class="profit">$20.87</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="31.27500000">
 <td>10</td>
 <td class="buy">$31.2750</td>
 <td class="pct">-1.099%</td>
-<td class="qty">11주</td>
-<td class="amt">$344.02</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$33.1515</td>
-<td class="profit">$20.64</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="30.92750000">
 <td>11</td>
 <td class="buy">$30.9275</td>
 <td class="pct">-1.111%</td>
-<td class="qty">11주</td>
-<td class="amt">$340.20</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$32.7831</td>
-<td class="profit">$20.41</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="30.58000000">
 <td>12</td>
 <td class="buy">$30.5800</td>
 <td class="pct">-1.124%</td>
-<td class="qty">11주</td>
-<td class="amt">$336.38</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$32.4148</td>
-<td class="profit">$20.18</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="30.23250000">
 <td>13</td>
 <td class="buy">$30.2325</td>
 <td class="pct">-1.136%</td>
-<td class="qty">11주</td>
-<td class="amt">$332.56</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$32.0465</td>
-<td class="profit">$19.95</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="29.88500000">
 <td>14</td>
 <td class="buy">$29.8850</td>
 <td class="pct">-1.149%</td>
-<td class="qty">11주</td>
-<td class="amt">$328.73</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$31.6781</td>
-<td class="profit">$19.72</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="29.53750000">
 <td>15</td>
 <td class="buy">$29.5375</td>
 <td class="pct">-1.163%</td>
-<td class="qty">11주</td>
-<td class="amt">$324.91</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$31.3098</td>
-<td class="profit">$19.49</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="29.19000000">
 <td>16</td>
 <td class="buy">$29.1900</td>
 <td class="pct">-1.176%</td>
-<td class="qty">11주</td>
-<td class="amt">$321.09</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$30.9414</td>
-<td class="profit">$19.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="28.84250000">
 <td>17</td>
 <td class="buy">$28.8425</td>
 <td class="pct">-1.190%</td>
-<td class="qty">11주</td>
-<td class="amt">$317.27</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$30.5731</td>
-<td class="profit">$19.04</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="28.49500000">
 <td>18</td>
 <td class="buy">$28.4950</td>
 <td class="pct">-1.205%</td>
-<td class="qty">11주</td>
-<td class="amt">$313.44</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$30.2047</td>
-<td class="profit">$18.81</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="28.14750000">
 <td>19</td>
 <td class="buy">$28.1475</td>
 <td class="pct">-1.220%</td>
-<td class="qty">11주</td>
-<td class="amt">$309.62</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$29.8364</td>
-<td class="profit">$18.58</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="27.80000000">
 <td>20</td>
 <td class="buy">$27.8000</td>
 <td class="pct">-1.235%</td>
-<td class="qty">11주</td>
-<td class="amt">$305.80</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$29.4680</td>
-<td class="profit">$18.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="27.45250000">
 <td>21</td>
 <td class="buy">$27.4525</td>
 <td class="pct">-1.250%</td>
-<td class="qty">11주</td>
-<td class="amt">$301.98</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$29.0997</td>
-<td class="profit">$18.12</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="27.10500000">
 <td>22</td>
 <td class="buy">$27.1050</td>
 <td class="pct">-1.266%</td>
-<td class="qty">11주</td>
-<td class="amt">$298.16</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$28.7313</td>
-<td class="profit">$17.89</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="26.75750000">
 <td>23</td>
 <td class="buy">$26.7575</td>
 <td class="pct">-1.282%</td>
-<td class="qty">11주</td>
-<td class="amt">$294.33</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$28.3630</td>
-<td class="profit">$17.66</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="26.41000000">
 <td>24</td>
 <td class="buy">$26.4100</td>
 <td class="pct">-1.299%</td>
-<td class="qty">11주</td>
-<td class="amt">$290.51</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$27.9946</td>
-<td class="profit">$17.43</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="26.06250000">
 <td>25</td>
 <td class="buy">$26.0625</td>
 <td class="pct">-1.316%</td>
-<td class="qty">11주</td>
-<td class="amt">$286.69</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$27.6263</td>
-<td class="profit">$17.20</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="25.71500000">
 <td>26</td>
 <td class="buy">$25.7150</td>
 <td class="pct">-1.333%</td>
-<td class="qty">11주</td>
-<td class="amt">$282.87</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$27.2579</td>
-<td class="profit">$16.97</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="25.36750000">
 <td>27</td>
 <td class="buy">$25.3675</td>
 <td class="pct">-1.351%</td>
-<td class="qty">11주</td>
-<td class="amt">$279.04</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$26.8895</td>
-<td class="profit">$16.74</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="25.02000000">
 <td>28</td>
 <td class="buy">$25.0200</td>
 <td class="pct">-1.370%</td>
-<td class="qty">11주</td>
-<td class="amt">$275.22</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$26.5212</td>
-<td class="profit">$16.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="24.67250000">
 <td>29</td>
 <td class="buy">$24.6725</td>
 <td class="pct">-1.389%</td>
-<td class="qty">11주</td>
-<td class="amt">$271.40</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$26.1529</td>
-<td class="profit">$16.28</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="24.32500000">
 <td>30</td>
 <td class="buy">$24.3250</td>
 <td class="pct">-1.408%</td>
-<td class="qty">11주</td>
-<td class="amt">$267.57</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$25.7845</td>
-<td class="profit">$16.05</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="23.97750000">
 <td>31</td>
 <td class="buy">$23.9775</td>
 <td class="pct">-1.429%</td>
-<td class="qty">11주</td>
-<td class="amt">$263.75</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$25.4162</td>
-<td class="profit">$15.83</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="23.63000000">
 <td>32</td>
 <td class="buy">$23.6300</td>
 <td class="pct">-1.449%</td>
-<td class="qty">11주</td>
-<td class="amt">$259.93</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$25.0478</td>
-<td class="profit">$15.60</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="23.28250000">
 <td>33</td>
 <td class="buy">$23.2825</td>
 <td class="pct">-1.471%</td>
-<td class="qty">11주</td>
-<td class="amt">$256.11</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$24.6794</td>
-<td class="profit">$15.37</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="22.93500000">
 <td>34</td>
 <td class="buy">$22.9350</td>
 <td class="pct">-1.493%</td>
-<td class="qty">11주</td>
-<td class="amt">$252.28</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$24.3111</td>
-<td class="profit">$15.14</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="22.58750000">
 <td>35</td>
 <td class="buy">$22.5875</td>
 <td class="pct">-1.515%</td>
-<td class="qty">11주</td>
-<td class="amt">$248.46</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$23.9428</td>
-<td class="profit">$14.91</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="22.24000000">
 <td>36</td>
 <td class="buy">$22.2400</td>
 <td class="pct">-1.538%</td>
-<td class="qty">11주</td>
-<td class="amt">$244.64</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$23.5744</td>
-<td class="profit">$14.68</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="21.89250000">
 <td>37</td>
 <td class="buy">$21.8925</td>
 <td class="pct">-1.562%</td>
-<td class="qty">11주</td>
-<td class="amt">$240.82</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$23.2060</td>
-<td class="profit">$14.45</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="21.54500000">
 <td>38</td>
 <td class="buy">$21.5450</td>
 <td class="pct">-1.587%</td>
-<td class="qty">11주</td>
-<td class="amt">$236.99</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$22.8377</td>
-<td class="profit">$14.22</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="21.19750000">
 <td>39</td>
 <td class="buy">$21.1975</td>
 <td class="pct">-1.613%</td>
-<td class="qty">11주</td>
-<td class="amt">$233.17</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$22.4693</td>
-<td class="profit">$13.99</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="20.85000000">
 <td>40</td>
 <td class="buy">$20.8500</td>
 <td class="pct">-1.639%</td>
-<td class="qty">11주</td>
-<td class="amt">$229.35</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$22.1010</td>
-<td class="profit">$13.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="20.50250000">
 <td>41</td>
 <td class="buy">$20.5025</td>
 <td class="pct">-1.667%</td>
-<td class="qty">11주</td>
-<td class="amt">$225.53</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$21.7326</td>
-<td class="profit">$13.53</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="20.15500000">
 <td>42</td>
 <td class="buy">$20.1550</td>
 <td class="pct">-1.695%</td>
-<td class="qty">11주</td>
-<td class="amt">$221.71</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$21.3643</td>
-<td class="profit">$13.30</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="19.80750000">
 <td>43</td>
 <td class="buy">$19.8075</td>
 <td class="pct">-1.724%</td>
-<td class="qty">11주</td>
-<td class="amt">$217.88</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$20.9959</td>
-<td class="profit">$13.07</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="19.46000000">
 <td>44</td>
 <td class="buy">$19.4600</td>
 <td class="pct">-1.754%</td>
-<td class="qty">11주</td>
-<td class="amt">$214.06</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$20.6276</td>
-<td class="profit">$12.84</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="19.11250000">
 <td>45</td>
 <td class="buy">$19.1125</td>
 <td class="pct">-1.786%</td>
-<td class="qty">11주</td>
-<td class="amt">$210.24</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$20.2592</td>
-<td class="profit">$12.61</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="18.76500000">
 <td>46</td>
 <td class="buy">$18.7650</td>
 <td class="pct">-1.818%</td>
-<td class="qty">11주</td>
-<td class="amt">$206.42</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$19.8909</td>
-<td class="profit">$12.38</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="18.41750000">
 <td>47</td>
 <td class="buy">$18.4175</td>
 <td class="pct">-1.852%</td>
-<td class="qty">11주</td>
-<td class="amt">$202.59</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$19.5225</td>
-<td class="profit">$12.16</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="18.07000000">
 <td>48</td>
 <td class="buy">$18.0700</td>
 <td class="pct">-1.887%</td>
-<td class="qty">11주</td>
-<td class="amt">$198.77</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$19.1542</td>
-<td class="profit">$11.93</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="17.72250000">
 <td>49</td>
 <td class="buy">$17.7225</td>
 <td class="pct">-1.923%</td>
-<td class="qty">11주</td>
-<td class="amt">$194.95</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$18.7858</td>
-<td class="profit">$11.70</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="4" data-buy="17.37500000">
 <td>50</td>
 <td class="buy">$17.3750</td>
 <td class="pct">-1.961%</td>
-<td class="qty">11주</td>
-<td class="amt">$191.12</td>
+<td class="target dynamic-budget">$340</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$18.4175</td>
-<td class="profit">$11.47</td>
+<td class="profit dynamic-profit">-</td>
 </tr></tbody>
-</table>
-</div>
-</div><div class="panel panel-5">
-<div class="engine-head">
-  <div>
-    <div class="eyebrow">ENGINE 5</div>
-    <h2>$17.3750 → $8.6875</h2>
-  </div>
-  <div class="engine-stats">
-    <div><span>세트당</span><strong>21주</strong></div>
-    <div><span>총투입</span><strong>$13,592</strong></div>
-    <div><span>1회전 이익</span><strong>$815</strong></div>
+    </table>
   </div>
 </div>
-<div class="table-wrap">
-<table>
-<thead>
-<tr><th>세트</th><th>매수가</th><th>직전대비</th><th>수량</th><th>매수금액</th><th>매도가 +6%</th><th>예상이익</th></tr>
-</thead>
-<tbody><tr>
+
+<div class="panel panel-5">
+  <div class="engine-head">
+    <div>
+      <div class="eyebrow">ENGINE 5</div>
+      <h2>$17.3750 → $8.6875</h2>
+    </div>
+    <div class="engine-stats">
+      <div><span>현재 목표금액</span><strong id="engBudget5">-</strong></div>
+      <div><span>엔진 실제투입</span><strong id="engActual5">-</strong></div>
+      <div><span>남는 현금</span><strong id="engReserve5">-</strong></div>
+      <div><span>1회전 예상이익</span><strong id="engProfit5">-</strong></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th>
+          <th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr data-engine="5" data-buy="17.20125000">
 <td>1</td>
 <td class="buy">$17.2013</td>
 <td class="pct">-1.000%</td>
-<td class="qty">21주</td>
-<td class="amt">$361.23</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$18.2333</td>
-<td class="profit">$21.67</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="17.02750000">
 <td>2</td>
 <td class="buy">$17.0275</td>
 <td class="pct">-1.010%</td>
-<td class="qty">21주</td>
-<td class="amt">$357.58</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$18.0492</td>
-<td class="profit">$21.45</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="16.85375000">
 <td>3</td>
 <td class="buy">$16.8538</td>
 <td class="pct">-1.020%</td>
-<td class="qty">21주</td>
-<td class="amt">$353.93</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$17.8650</td>
-<td class="profit">$21.24</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="16.68000000">
 <td>4</td>
 <td class="buy">$16.6800</td>
 <td class="pct">-1.031%</td>
-<td class="qty">21주</td>
-<td class="amt">$350.28</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$17.6808</td>
-<td class="profit">$21.02</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="16.50625000">
 <td>5</td>
 <td class="buy">$16.5063</td>
 <td class="pct">-1.042%</td>
-<td class="qty">21주</td>
-<td class="amt">$346.63</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$17.4966</td>
-<td class="profit">$20.80</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="16.33250000">
 <td>6</td>
 <td class="buy">$16.3325</td>
 <td class="pct">-1.053%</td>
-<td class="qty">21주</td>
-<td class="amt">$342.98</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$17.3125</td>
-<td class="profit">$20.58</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="16.15875000">
 <td>7</td>
 <td class="buy">$16.1588</td>
 <td class="pct">-1.064%</td>
-<td class="qty">21주</td>
-<td class="amt">$339.33</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$17.1283</td>
-<td class="profit">$20.36</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.98500000">
 <td>8</td>
 <td class="buy">$15.9850</td>
 <td class="pct">-1.075%</td>
-<td class="qty">21주</td>
-<td class="amt">$335.69</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.9441</td>
-<td class="profit">$20.14</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.81125000">
 <td>9</td>
 <td class="buy">$15.8112</td>
 <td class="pct">-1.087%</td>
-<td class="qty">21주</td>
-<td class="amt">$332.04</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.7599</td>
-<td class="profit">$19.92</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.63750000">
 <td>10</td>
 <td class="buy">$15.6375</td>
 <td class="pct">-1.099%</td>
-<td class="qty">21주</td>
-<td class="amt">$328.39</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.5757</td>
-<td class="profit">$19.70</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.46375000">
 <td>11</td>
 <td class="buy">$15.4637</td>
 <td class="pct">-1.111%</td>
-<td class="qty">21주</td>
-<td class="amt">$324.74</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.3916</td>
-<td class="profit">$19.48</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.29000000">
 <td>12</td>
 <td class="buy">$15.2900</td>
 <td class="pct">-1.124%</td>
-<td class="qty">21주</td>
-<td class="amt">$321.09</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.2074</td>
-<td class="profit">$19.27</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="15.11625000">
 <td>13</td>
 <td class="buy">$15.1163</td>
 <td class="pct">-1.136%</td>
-<td class="qty">21주</td>
-<td class="amt">$317.44</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$16.0232</td>
-<td class="profit">$19.05</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.94250000">
 <td>14</td>
 <td class="buy">$14.9425</td>
 <td class="pct">-1.149%</td>
-<td class="qty">21주</td>
-<td class="amt">$313.79</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$15.8391</td>
-<td class="profit">$18.83</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.76875000">
 <td>15</td>
 <td class="buy">$14.7688</td>
 <td class="pct">-1.163%</td>
-<td class="qty">21주</td>
-<td class="amt">$310.14</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$15.6549</td>
-<td class="profit">$18.61</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.59500000">
 <td>16</td>
 <td class="buy">$14.5950</td>
 <td class="pct">-1.176%</td>
-<td class="qty">21주</td>
-<td class="amt">$306.50</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$15.4707</td>
-<td class="profit">$18.39</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.42125000">
 <td>17</td>
 <td class="buy">$14.4213</td>
 <td class="pct">-1.190%</td>
-<td class="qty">21주</td>
-<td class="amt">$302.85</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$15.2865</td>
-<td class="profit">$18.17</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.24750000">
 <td>18</td>
 <td class="buy">$14.2475</td>
 <td class="pct">-1.205%</td>
-<td class="qty">21주</td>
-<td class="amt">$299.20</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$15.1023</td>
-<td class="profit">$17.95</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="14.07375000">
 <td>19</td>
 <td class="buy">$14.0738</td>
 <td class="pct">-1.220%</td>
-<td class="qty">21주</td>
-<td class="amt">$295.55</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$14.9182</td>
-<td class="profit">$17.73</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.90000000">
 <td>20</td>
 <td class="buy">$13.9000</td>
 <td class="pct">-1.235%</td>
-<td class="qty">21주</td>
-<td class="amt">$291.90</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$14.7340</td>
-<td class="profit">$17.51</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.72625000">
 <td>21</td>
 <td class="buy">$13.7263</td>
 <td class="pct">-1.250%</td>
-<td class="qty">21주</td>
-<td class="amt">$288.25</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$14.5498</td>
-<td class="profit">$17.30</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.55250000">
 <td>22</td>
 <td class="buy">$13.5525</td>
 <td class="pct">-1.266%</td>
-<td class="qty">21주</td>
-<td class="amt">$284.60</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$14.3657</td>
-<td class="profit">$17.08</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.37875000">
 <td>23</td>
 <td class="buy">$13.3788</td>
 <td class="pct">-1.282%</td>
-<td class="qty">21주</td>
-<td class="amt">$280.95</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$14.1815</td>
-<td class="profit">$16.86</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.20500000">
 <td>24</td>
 <td class="buy">$13.2050</td>
 <td class="pct">-1.299%</td>
-<td class="qty">21주</td>
-<td class="amt">$277.31</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.9973</td>
-<td class="profit">$16.64</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="13.03125000">
 <td>25</td>
 <td class="buy">$13.0312</td>
 <td class="pct">-1.316%</td>
-<td class="qty">21주</td>
-<td class="amt">$273.66</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.8131</td>
-<td class="profit">$16.42</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="12.85750000">
 <td>26</td>
 <td class="buy">$12.8575</td>
 <td class="pct">-1.333%</td>
-<td class="qty">21주</td>
-<td class="amt">$270.01</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.6290</td>
-<td class="profit">$16.20</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="12.68375000">
 <td>27</td>
 <td class="buy">$12.6837</td>
 <td class="pct">-1.351%</td>
-<td class="qty">21주</td>
-<td class="amt">$266.36</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.4448</td>
-<td class="profit">$15.98</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="12.51000000">
 <td>28</td>
 <td class="buy">$12.5100</td>
 <td class="pct">-1.370%</td>
-<td class="qty">21주</td>
-<td class="amt">$262.71</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.2606</td>
-<td class="profit">$15.76</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="12.33625000">
 <td>29</td>
 <td class="buy">$12.3362</td>
 <td class="pct">-1.389%</td>
-<td class="qty">21주</td>
-<td class="amt">$259.06</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$13.0764</td>
-<td class="profit">$15.54</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="12.16250000">
 <td>30</td>
 <td class="buy">$12.1625</td>
 <td class="pct">-1.408%</td>
-<td class="qty">21주</td>
-<td class="amt">$255.41</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$12.8923</td>
-<td class="profit">$15.32</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.98875000">
 <td>31</td>
 <td class="buy">$11.9887</td>
 <td class="pct">-1.429%</td>
-<td class="qty">21주</td>
-<td class="amt">$251.76</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$12.7081</td>
-<td class="profit">$15.11</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.81500000">
 <td>32</td>
 <td class="buy">$11.8150</td>
 <td class="pct">-1.449%</td>
-<td class="qty">21주</td>
-<td class="amt">$248.11</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$12.5239</td>
-<td class="profit">$14.89</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.64125000">
 <td>33</td>
 <td class="buy">$11.6412</td>
 <td class="pct">-1.471%</td>
-<td class="qty">21주</td>
-<td class="amt">$244.47</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$12.3397</td>
-<td class="profit">$14.67</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.46750000">
 <td>34</td>
 <td class="buy">$11.4675</td>
 <td class="pct">-1.493%</td>
-<td class="qty">21주</td>
-<td class="amt">$240.82</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$12.1555</td>
-<td class="profit">$14.45</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.29375000">
 <td>35</td>
 <td class="buy">$11.2937</td>
 <td class="pct">-1.515%</td>
-<td class="qty">21주</td>
-<td class="amt">$237.17</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.9714</td>
-<td class="profit">$14.23</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="11.12000000">
 <td>36</td>
 <td class="buy">$11.1200</td>
 <td class="pct">-1.538%</td>
-<td class="qty">21주</td>
-<td class="amt">$233.52</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.7872</td>
-<td class="profit">$14.01</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.94625000">
 <td>37</td>
 <td class="buy">$10.9462</td>
 <td class="pct">-1.562%</td>
-<td class="qty">21주</td>
-<td class="amt">$229.87</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.6030</td>
-<td class="profit">$13.79</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.77250000">
 <td>38</td>
 <td class="buy">$10.7725</td>
 <td class="pct">-1.587%</td>
-<td class="qty">21주</td>
-<td class="amt">$226.22</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.4188</td>
-<td class="profit">$13.57</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.59875000">
 <td>39</td>
 <td class="buy">$10.5987</td>
 <td class="pct">-1.613%</td>
-<td class="qty">21주</td>
-<td class="amt">$222.57</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.2347</td>
-<td class="profit">$13.35</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.42500000">
 <td>40</td>
 <td class="buy">$10.4250</td>
 <td class="pct">-1.639%</td>
-<td class="qty">21주</td>
-<td class="amt">$218.92</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$11.0505</td>
-<td class="profit">$13.14</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.25125000">
 <td>41</td>
 <td class="buy">$10.2512</td>
 <td class="pct">-1.667%</td>
-<td class="qty">21주</td>
-<td class="amt">$215.28</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$10.8663</td>
-<td class="profit">$12.92</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="10.07750000">
 <td>42</td>
 <td class="buy">$10.0775</td>
 <td class="pct">-1.695%</td>
-<td class="qty">21주</td>
-<td class="amt">$211.63</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$10.6822</td>
-<td class="profit">$12.70</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.90375000">
 <td>43</td>
 <td class="buy">$9.9037</td>
 <td class="pct">-1.724%</td>
-<td class="qty">21주</td>
-<td class="amt">$207.98</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$10.4980</td>
-<td class="profit">$12.48</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.73000000">
 <td>44</td>
 <td class="buy">$9.7300</td>
 <td class="pct">-1.754%</td>
-<td class="qty">21주</td>
-<td class="amt">$204.33</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$10.3138</td>
-<td class="profit">$12.26</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.55625000">
 <td>45</td>
 <td class="buy">$9.5562</td>
 <td class="pct">-1.786%</td>
-<td class="qty">21주</td>
-<td class="amt">$200.68</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$10.1296</td>
-<td class="profit">$12.04</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.38250000">
 <td>46</td>
 <td class="buy">$9.3825</td>
 <td class="pct">-1.818%</td>
-<td class="qty">21주</td>
-<td class="amt">$197.03</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$9.9455</td>
-<td class="profit">$11.82</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.20875000">
 <td>47</td>
 <td class="buy">$9.2087</td>
 <td class="pct">-1.852%</td>
-<td class="qty">21주</td>
-<td class="amt">$193.38</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$9.7613</td>
-<td class="profit">$11.60</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="9.03500000">
 <td>48</td>
 <td class="buy">$9.0350</td>
 <td class="pct">-1.887%</td>
-<td class="qty">21주</td>
-<td class="amt">$189.74</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$9.5771</td>
-<td class="profit">$11.38</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="8.86125000">
 <td>49</td>
 <td class="buy">$8.8613</td>
 <td class="pct">-1.923%</td>
-<td class="qty">21주</td>
-<td class="amt">$186.09</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$9.3929</td>
-<td class="profit">$11.17</td>
-</tr><tr>
+<td class="profit dynamic-profit">-</td>
+</tr>
+<tr data-engine="5" data-buy="8.68750000">
 <td>50</td>
 <td class="buy">$8.6875</td>
 <td class="pct">-1.961%</td>
-<td class="qty">21주</td>
-<td class="amt">$182.44</td>
+<td class="target dynamic-budget">$400</td>
+<td class="qty dynamic-qty">-</td>
+<td class="amt dynamic-actual">-</td>
 <td class="sell">$9.2088</td>
-<td class="profit">$10.95</td>
+<td class="profit dynamic-profit">-</td>
 </tr></tbody>
-</table>
-</div>
+    </table>
+  </div>
 </div>
 </div>
 
 <div class="note">
-  매매할 때는 파란색 <b>매수가</b>와 초록색 <b>매도가(+6%)</b>를 중심으로 보시면 됩니다.
-  엔진 탭은 자바스크립트 없이 동작하도록 만들어 모바일 미리보기에서도 터치 전환이 되도록 했습니다.
+  기본 세트금액은 E1 $280 / E2 $280 / E3 $300 / E4 $340 / E5 $400입니다.
+  전략자금이 올라가면 이 비율을 그대로 유지하면서 각 엔진의 목표금액이 자동 증가합니다.
+  각 세트의 매수수량은 목표금액을 넘지 않는 정수주로 자동 계산합니다.
+  정수주 때문에 쓰지 못한 금액은 리저브로 자동 표시됩니다.
 </div>
+
 </div>
+
+<script>
+const BASE_CAPITAL = 80000;
+const BASE_BUDGETS = [280,280,300,340,400];
+const STORAGE_KEY = 'sandwich_total_realized_v3';
+let memoryProfit = 0;
+let storageAvailable = true;
+
+function money(n, d=0) {
+  return '$' + Number(n).toLocaleString('en-US', {
+    minimumFractionDigits:d, maximumFractionDigits:d
+  });
+}
+
+function testStorage() {
+  try {
+    localStorage.setItem('__sandwich_test__', '1');
+    localStorage.removeItem('__sandwich_test__');
+    storageAvailable = true;
+  } catch (e) {
+    storageAvailable = false;
+  }
+}
+
+function getStoredProfit() {
+  if (!storageAvailable) return memoryProfit;
+  try {
+    const v = parseFloat(localStorage.getItem(STORAGE_KEY));
+    return Number.isFinite(v) && v >= 0 ? v : 0;
+  } catch (e) {
+    storageAvailable = false;
+    return memoryProfit;
+  }
+}
+
+function setStoredProfit(v) {
+  v = Math.max(0, Number(v) || 0);
+  memoryProfit = v;
+  if (!storageAvailable) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, String(v));
+  } catch (e) {
+    storageAvailable = false;
+  }
+}
+
+function calcGrowth(totalRealized) {
+  let capital = BASE_CAPITAL;
+  let consumed = 0;
+  let steps = 0;
+
+  while (steps < 100) {
+    const hurdle = capital * 0.10;
+    if (totalRealized - consumed + 1e-9 >= hurdle) {
+      consumed += hurdle;
+      capital *= 1.10;
+      steps++;
+    } else break;
+  }
+
+  const currentHurdle = capital * 0.10;
+  const carry = Math.max(0, totalRealized - consumed);
+  const remaining = Math.max(0, currentHurdle - carry);
+  const cumulativeThreshold = consumed + currentHurdle;
+  const nextCapital = capital * 1.10;
+  const progressPct = Math.min(100, currentHurdle > 0 ? carry/currentHurdle*100 : 0);
+
+  return {capital, steps, consumed, carry, currentHurdle,
+          remaining, cumulativeThreshold, nextCapital, progressPct};
+}
+
+function recalcTables(scale) {
+  let totalActual = 0;
+  const engineActual = [0,0,0,0,0];
+  const engineProfit = [0,0,0,0,0];
+  const engineTarget = [0,0,0,0,0];
+
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    const engine = parseInt(tr.dataset.engine);
+    const buy = parseFloat(tr.dataset.buy);
+    const budget = BASE_BUDGETS[engine-1] * scale;
+    const qty = Math.max(1, Math.floor(budget / buy));
+    const actual = qty * buy;
+    const profit = actual * 0.06;
+
+    tr.querySelector('.dynamic-budget').textContent = money(budget);
+    tr.querySelector('.dynamic-qty').textContent = qty + '주';
+    tr.querySelector('.dynamic-actual').textContent = money(actual, 2);
+    tr.querySelector('.dynamic-profit').textContent = money(profit, 2);
+
+    totalActual += actual;
+    engineActual[engine-1] += actual;
+    engineProfit[engine-1] += profit;
+    engineTarget[engine-1] += budget;
+  });
+
+  for (let i=1;i<=5;i++) {
+    const b = BASE_BUDGETS[i-1] * scale;
+    const nextB = b * 1.10;
+    document.getElementById('alloc'+i).textContent = money(b);
+    document.getElementById('nextAlloc'+i).textContent = money(nextB);
+    document.getElementById('engBudget'+i).textContent = money(b);
+    document.getElementById('engActual'+i).textContent = money(engineActual[i-1]);
+    document.getElementById('engReserve'+i).textContent = money(engineTarget[i-1]-engineActual[i-1]);
+    document.getElementById('engProfit'+i).textContent = money(engineProfit[i-1]);
+  }
+
+  return {totalActual};
+}
+
+function render(showFlash=false, oldSteps=null) {
+  const totalRealized = getStoredProfit();
+  const g = calcGrowth(totalRealized);
+  const scale = g.capital / BASE_CAPITAL;
+  const t = recalcTables(scale);
+  const reserve = g.capital - t.totalActual;
+
+  document.getElementById('currentCapital').textContent = money(g.capital);
+  document.getElementById('actualAllocated').textContent = money(t.totalActual);
+  document.getElementById('reserveCash').textContent = money(reserve);
+  document.getElementById('stepValue').textContent = g.steps + '단계';
+
+  document.getElementById('totalRealized').textContent = money(totalRealized, 2);
+  document.getElementById('cumulativeThreshold').textContent = money(g.cumulativeThreshold);
+  document.getElementById('remainingProfit').textContent = money(g.remaining, 2);
+  document.getElementById('nextCapital').textContent = money(g.nextCapital);
+  document.getElementById('progressBar').style.width = g.progressPct.toFixed(1) + '%';
+  document.getElementById('progressText').textContent =
+    g.progressPct.toFixed(1) + '% · 현재 단계 이월수익 ' + money(g.carry, 2);
+
+  const flash = document.getElementById('flashMsg');
+
+  if (!storageAvailable) {
+    flash.style.display = 'block';
+    flash.style.background = '#fff7ed';
+    flash.style.color = '#9a3412';
+    flash.textContent = '현재 미리보기에서는 저장 기능이 제한되어 있습니다. 수익 추가 계산은 동작하지만, 창을 닫으면 초기화될 수 있습니다. GitHub Pages에 올리면 자동 저장됩니다.';
+  } else if (showFlash && oldSteps !== null && g.steps > oldSteps) {
+    flash.style.display = 'block';
+    flash.style.background = '#ecfdf5';
+    flash.style.color = '#065f46';
+    flash.textContent = g.steps + '단계로 자동 증액되었습니다. 현재 전략자금은 ' + money(g.capital) + '입니다.';
+  } else if (!showFlash) {
+    flash.style.display = 'none';
+  }
+}
+
+function addProfit() {
+  const inp = document.getElementById('profitAdd');
+  const raw = String(inp.value || '').replace(/,/g,'').trim();
+  const add = Number(raw);
+
+  if (!Number.isFinite(add) || add <= 0) {
+    inp.focus();
+    inp.style.borderColor = '#ef4444';
+    setTimeout(()=>inp.style.borderColor='', 1200);
+    return;
+  }
+
+  const beforeSteps = calcGrowth(getStoredProfit()).steps;
+  const newTotal = getStoredProfit() + add;
+  setStoredProfit(newTotal);
+  inp.value = '';
+  render(true, beforeSteps);
+}
+
+function resetProfit() {
+  setStoredProfit(0);
+  render(false);
+}
+
+function init() {
+  testStorage();
+
+  const addBtn = document.getElementById('addProfitBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const input = document.getElementById('profitAdd');
+
+  addBtn.setAttribute('type','button');
+  resetBtn.setAttribute('type','button');
+
+  addBtn.addEventListener('click', addProfit);
+  resetBtn.addEventListener('click', resetProfit);
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addProfit();
+    }
+  });
+
+  render(false);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
 </body>
 </html>
