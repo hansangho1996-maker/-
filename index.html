@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#fff8ed">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
 <meta name="description" content="개인용 샌드위치 매매 전략 계산표">
 <title>샌드위치 매매</title>
 <style>
@@ -126,8 +128,12 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:13px 0}
  .growth-data{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
  .growth-item b{font-size:12px}
  .engine-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
- .table-wrap{display:none}
- .mobile-list{display:block}
+ .table-wrap{display:block}
+ .mobile-list{display:none}
+ table{min-width:740px;font-size:12px}
+ th,td{padding:9px 7px}
+ th:first-child,td:first-child{position:sticky;left:0;background:#fffdf8;z-index:1}
+ th:first-child{background:#fbf4e8;z-index:2}
  .engine-tabs{gap:6px}
  .engine-tab{min-width:58px;min-height:50px}
 }
@@ -218,8 +224,8 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin:13px 0}
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>세트번호</th><th>매수가</th><th>직전대비 하락률</th><th>목표 세트금액</th>
-        <th>정수주 매수수량</th><th>실제 매수금액</th><th>목표 매도가</th><th>예상이익</th>
+        <th>세트번호</th><th>매수가</th><th>정수주 매수수량</th><th>실제 매수금액</th>
+        <th>목표 매도가</th><th>예상이익</th><th>직전대비 하락률</th>
       </tr></thead>
       <tbody id="engineRows"></tbody>
     </table>
@@ -378,7 +384,7 @@ function updateForm(){
   el("setsPerEngine").value=state.setsPerEngine;
   el("takeProfitPct").value=state.takeProfitPct;
   el("autoSetAmount").checked=state.autoSetAmount;
-  el("manualSetAmount").value=state.manualSetAmount;
+  el("manualSetAmount").value=state.autoSetAmount?Number(getDerivedState().setAmount.toFixed(6)):state.manualSetAmount;
   el("manualSetAmount").disabled=state.autoSetAmount;
   el("totalRealizedProfit").value=state.totalRealizedProfit;
 }
@@ -423,12 +429,11 @@ function renderEngine(){
     var tr=document.createElement("tr");
     addTableCell(tr,"E"+(state.selectedEngine+1)+"-"+String(r.number).padStart(2,"0"));
     addTableCell(tr,priceFmt.format(r.buyPrice),"buy");
-    addTableCell(tr,r.previousDropPct.toFixed(2)+"%");
-    addTableCell(tr,money.format(r.targetAmount));
     addTableCell(tr,r.quantity===0?"0주":qtyFmt.format(r.quantity)+"주",r.quantity===0?"unavailable":"qty");
     addTableCell(tr,money.format(r.actualAmount),"actual");
     addTableCell(tr,priceFmt.format(r.sellPrice),"sell");
     addTableCell(tr,money.format(r.expectedProfit),"profit");
+    addTableCell(tr,r.previousDropPct.toFixed(2)+"%");
     tbody.appendChild(tr);
 
     var card=document.createElement("article");
@@ -490,6 +495,7 @@ function render(){
   el("growthProgressBar").style.width=progress+"%";
   el("applyRecommendedBtn").disabled=!ready;
   el("manualSetAmount").disabled=state.autoSetAmount;
+  if(state.autoSetAmount)el("manualSetAmount").value=Number(d.setAmount.toFixed(6));
   renderTabs();
   renderEngine();
 }
