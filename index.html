@@ -2,459 +2,591 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff8ed">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="샌드위치 매매">
-<title>샌드위치 매매법</title>
+<meta name="description" content="개인용 샌드위치 매매 전략 계산표">
+<title>샌드위치 매매</title>
 <style>
 :root{
-  --bg:#f5f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
-  --buy:#0f62fe; --sell:#0f9d58; --accent:#f59e0b; --violet:#7c3aed;
-  --soft:#f9fafb; --good:#047857; --warn:#b45309;
+  color-scheme:light;
+  --bg:#fff8ed;--paper:#fffdf8;--card:#ffffff;--ink:#332b23;--muted:#7c7165;
+  --line:#eadfce;--bread:#c88642;--cheese:#f6c453;--blue:#2768b2;--blue-bg:#eaf3ff;
+  --green:#168257;--green-bg:#e9f7ef;--red:#bd3434;--red-bg:#fff0ed;--shadow:0 8px 24px rgba(88,60,30,.08);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
-.wrap{max-width:1120px;margin:0 auto;padding:14px}
-.hero,.growth,.settings{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
-h1{margin:0;font-size:25px}.sub{margin-top:6px;color:var(--muted);font-size:13px}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-.sum{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
-.sum span,.metric-label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
-.sum strong{font-size:20px}
-.good{color:var(--good)} .warn{color:var(--warn)}
-.alloc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
-.alloc-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-.alloc-title{font-weight:800;font-size:12px;color:var(--muted)}
-.alloc-target{font-weight:900;font-size:18px;margin-top:3px;color:var(--violet)}
-.alloc-next{font-size:11px;color:var(--muted);margin-top:4px}
-.alloc-range{font-size:11px;color:var(--muted);margin-top:3px}
-
-.settings-title,.growth-title{font-size:18px;font-weight:900}
-.settings-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;margin-top:12px}
-.sbox,.gbox{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
-.sbox input,.gbox input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;background:#fff}
-.btn{width:100%;border:0;border-radius:10px;padding:12px;font-size:15px;font-weight:800;cursor:pointer}
-.btn-primary{background:var(--accent);color:#111827}
-.btn-danger{background:#fee2e2;color:#991b1b}
-
-.entry-grid{display:grid;grid-template-columns:1.3fr .8fr .8fr;gap:10px;margin-top:12px}
-.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
-.gvalue{font-size:20px;font-weight:900}
-.progress{height:11px;border-radius:999px;background:#e5e7eb;overflow:hidden;margin-top:10px}
-.progress>div{height:100%;width:0;background:var(--accent);transition:width .2s}
-.progress-text{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
-.rule{font-size:12px;color:var(--muted);line-height:1.65;margin-top:10px}
-.flash{margin-top:10px;padding:10px 12px;border-radius:10px;background:#ecfdf5;color:#065f46;font-size:13px;display:none}
-
-input[type="radio"]{position:absolute;opacity:0;pointer-events:none}
-.tabs{display:flex;gap:8px;overflow-x:auto;margin:14px 0 12px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.tabs label{display:block;min-width:70px;text-align:center;padding:12px 16px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:800;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-#tab1:checked~.tabs label[for="tab1"],#tab2:checked~.tabs label[for="tab2"],#tab3:checked~.tabs label[for="tab3"],#tab4:checked~.tabs label[for="tab4"],#tab5:checked~.tabs label[for="tab5"]{background:#fff}
-#tab1:checked~.tabs label[for="tab1"]{background:var(--accent);color:#111827;border-color:var(--accent)}
-#tab2:checked~.tabs label[for="tab2"]{background:var(--accent);color:#111827;border-color:var(--accent)}
-#tab3:checked~.tabs label[for="tab3"]{background:var(--accent);color:#111827;border-color:var(--accent)}
-#tab4:checked~.tabs label[for="tab4"]{background:var(--accent);color:#111827;border-color:var(--accent)}
-#tab5:checked~.tabs label[for="tab5"]{background:var(--accent);color:#111827;border-color:var(--accent)}
-.panels .panel{display:none}
-#tab1:checked~.tabs~.panels .panel-1{display:block}
-#tab2:checked~.tabs~.panels .panel-2{display:block}
-#tab3:checked~.tabs~.panels .panel-3{display:block}
-#tab4:checked~.tabs~.panels .panel-4{display:block}
-#tab5:checked~.tabs~.panels .panel-5{display:block}
-
-.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px}
-.engine-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:12px}
-.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
-.engine-head h2{margin:3px 0 0;font-size:21px}
-.engine-stats{display:flex;gap:8px;flex-wrap:wrap}
-.engine-stats div{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-.engine-stats span{display:block;font-size:10px;color:var(--muted)} .engine-stats strong{font-size:14px}
-.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;min-width:790px;background:#fff}
-th,td{padding:10px 9px;border-bottom:1px solid var(--line);font-size:13px;text-align:right;white-space:nowrap}
-th{background:#f3f4f6;color:#374151;position:sticky;top:0}
-th:first-child,td:first-child{text-align:center}
-.buy{color:var(--buy);font-weight:800;font-size:14px}.sell{color:var(--sell);font-weight:800;font-size:14px}
-.qty{font-weight:800}.target{font-weight:700;color:var(--violet)}.profit{color:var(--good);font-weight:700}.pct{color:#6b7280}
-tbody tr:nth-child(5n) td{border-bottom:2px solid #cbd5e1}
-.note{color:var(--muted);font-size:12px;line-height:1.65;padding:10px 4px 20px}
-
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-size:15px}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1200px;margin:auto;padding:14px 16px calc(30px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 16px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:52px;height:52px;flex:none}
+.brand h1{font-size:21px;margin:0;letter-spacing:-.04em}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.save-state{font-size:12px;color:var(--green);white-space:nowrap}
+.save-state.error{color:var(--red)}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.metric{padding:14px 15px;min-height:91px}
+.metric-label{display:block;color:var(--muted);font-size:12px}
+.metric-value{display:block;margin-top:9px;font-size:23px;line-height:1.15;font-weight:850;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.metric-value.profit{color:var(--green)}
+.section{margin-top:14px;padding:16px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 13px}
+.section-title h2{font-size:16px;margin:0;letter-spacing:-.02em}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:12px;color:var(--muted)}
+.field input[type=number],.field input[type=text]{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font-size:16px;font-variant-numeric:tabular-nums}
+.field input:focus,.profit-add input:focus{outline:3px solid #f6c45366;border-color:var(--bread)}
+.field input:disabled{background:#f7f2e9;color:#796d60}
+.amount-control{display:grid;grid-template-columns:auto minmax(120px,1fr);align-items:center;gap:9px}
+.check-label{display:flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap}
+.check-label input{width:20px;height:20px;accent-color:var(--bread)}
+.profit-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+.profit-add input{min-width:0;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:16px}
+.btn{min-height:44px;border:1px solid var(--line);border-radius:11px;padding:9px 13px;background:#fff;color:var(--ink);font-weight:700}
+.btn.primary{background:var(--bread);border-color:var(--bread);color:#fff}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.red{color:var(--red);border-color:#e8b7af;background:#fff8f6}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.growth{margin-top:13px;padding:13px 14px;border-radius:13px;background:#fbf5e9;border:1px solid #eddfc6}
+.growth-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.growth-status{font-weight:800;font-size:14px}
+.growth-data{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
+.growth-item span{display:block;color:var(--muted);font-size:11px}
+.growth-item b{display:block;margin-top:3px;font-variant-numeric:tabular-nums}
+.progress{height:7px;background:#eadfce;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress>span{height:100%;width:0;display:block;background:var(--bread);border-radius:99px;transition:width .2s}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-item{padding:11px;border-radius:12px;background:var(--paper);border:1px solid var(--line)}
+.calc-item span{display:block;color:var(--muted);font-size:11px}
+.calc-item b{display:block;margin-top:5px;font-size:16px;font-variant-numeric:tabular-nums}
+.calc-note{margin:10px 0 0;font-size:12px;color:var(--muted)}
+.warning{display:none;margin-top:10px;padding:11px 12px;border-radius:11px;background:var(--red-bg);color:var(--red);font-weight:800}
+.warning.show{display:block}
+.engine-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 7px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.engine-tab{flex:1;min-width:70px;min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-weight:800}
+.engine-tab.active{background:#fff0d8;border-color:var(--bread);color:#744313;box-shadow:inset 0 0 0 1px var(--bread)}
+.engine-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:7px 0 11px}
+.engine-summary .calc-item{background:#fff}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:890px;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 9px;text-align:right;border-bottom:1px solid #efe7da;white-space:nowrap}
+th{position:sticky;top:0;background:#fbf4e8;color:#65594d;font-size:11px;z-index:1}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:0}
+td.buy{color:var(--blue);font-weight:850}
+td.qty{font-weight:900}
+td.actual{background:#f2f7ff;font-weight:850}
+td.sell{color:var(--green);font-weight:850}
+td.profit{color:var(--green);font-weight:750}
+td.unavailable{color:var(--red);font-weight:800}
+.mobile-list{display:none}
+.set-card{padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff;margin-bottom:8px}
+.set-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px;font-weight:800}
+.set-head small{font-weight:600;color:var(--muted)}
+.set-main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.set-value{padding:8px;border-radius:9px;background:#faf7f1;min-width:0}
+.set-value.main-buy{background:var(--blue-bg)}
+.set-value.main-sell{background:var(--green-bg)}
+.set-value span{display:block;color:var(--muted);font-size:10px}
+.set-value b{display:block;margin-top:3px;font-size:16px;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}
+.set-value.main-buy b{color:var(--blue)}
+.set-value.main-sell b{color:var(--green)}
+.set-extra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}
+.set-extra .set-value b{font-size:13px}
+details.advanced{margin-top:14px}
+details.advanced summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;padding:10px 2px}
+.advanced-body{padding:12px;background:#fff;border:1px solid var(--line);border-radius:13px}
+.advanced-actions{display:flex;flex-wrap:wrap;gap:8px}
+.advanced-note{font-size:11px;color:var(--muted);line-height:1.5;margin:10px 0 0}
+.file-input{display:none}
+footer{text-align:center;color:var(--muted);font-size:11px;margin:13px 0}
 @media(max-width:760px){
-  .summary{grid-template-columns:1fr 1fr}
-  .alloc-grid{grid-template-columns:repeat(2,1fr)}
-  .settings-grid,.entry-grid{grid-template-columns:1fr}
-  .status-grid{grid-template-columns:1fr 1fr}
-  .sum strong,.gvalue{font-size:18px}
-  table{min-width:720px}
-  th,td{padding:9px 7px;font-size:12px}
+ .wrap{padding:10px 10px calc(22px + env(safe-area-inset-bottom))}
+ header{margin:3px 1px 12px}
+ .logo{width:46px;height:46px}
+ .brand h1{font-size:18px}
+ .brand p{font-size:11px}
+ .summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .metric{min-height:78px;padding:11px 12px}
+ .metric-value{font-size:20px;margin-top:7px}
+ .section{margin-top:10px;padding:12px}
+ .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .form-grid .wide{grid-column:1/-1}
+ .amount-control{grid-template-columns:1fr}
+ .check-label{min-height:24px}
+ .calc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .calc-item{padding:9px}
+ .calc-item b{font-size:14px}
+ .growth-data{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .growth-item b{font-size:12px}
+ .engine-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .table-wrap{display:none}
+ .mobile-list{display:block}
+ .engine-tabs{gap:6px}
+ .engine-tab{min-width:58px;min-height:50px}
+}
+@media(max-width:380px){
+ .save-state{font-size:10px}
+ .metric-value{font-size:18px}
+ .growth-top{align-items:flex-start;flex-direction:column}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-
-<section class="hero">
-  <h1>샌드위치 매매표</h1>
-  <div class="sub">5엔진 고정 · 기준 고점 자동 재계산 · +6% 익절 · 실현수익 자동 증액</div>
-
-  <div class="summary">
-    <div class="sum"><span>현재 전략자금</span><strong id="currentCapital">$80,000</strong></div>
-    <div class="sum"><span>실제 정수주 배정</span><strong id="actualAllocated">-</strong></div>
-    <div class="sum"><span>현재 리저브</span><strong id="reserveCash" class="good">-</strong></div>
-    <div class="sum"><span>증액 단계</span><strong id="stepValue">0단계</strong></div>
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 64 64" role="img" aria-label="다섯 겹 샌드위치 로고">
+      <path d="M8 21C10 10 20 5 32 5s22 5 24 16H8Z" fill="#C88642"/>
+      <rect x="8" y="23" width="48" height="5" rx="2.5" fill="#2768B2"/>
+      <rect x="8" y="29" width="48" height="5" rx="2.5" fill="#F6C453"/>
+      <rect x="8" y="35" width="48" height="5" rx="2.5" fill="#168257"/>
+      <rect x="8" y="41" width="48" height="5" rx="2.5" fill="#D97745"/>
+      <rect x="8" y="47" width="48" height="5" rx="2.5" fill="#8A5AC2"/>
+      <path d="M8 54h48v2c0 3-3 5-6 5H14c-3 0-6-2-6-5v-2Z" fill="#C88642"/>
+    </svg>
+    <div><h1>샌드위치 매매</h1><p>개인용 전략 계산표</p></div>
   </div>
+  <div id="saveState" class="save-state" role="status" aria-live="polite">● 저장됨</div>
+</header>
 
-  <div class="alloc-grid" id="allocGrid"></div>
+<section class="summary" aria-label="핵심 정보">
+  <div class="card metric"><span class="metric-label">현재 전략자금</span><strong id="sumCapital" class="metric-value">$80,000</strong></div>
+  <div class="card metric"><span class="metric-label">세트당 목표금액</span><strong id="sumSetAmount" class="metric-value">$320</strong></div>
+  <div class="card metric"><span class="metric-label">누적 실현수익</span><strong id="sumProfit" class="metric-value profit">$0</strong></div>
+  <div class="card metric"><span class="metric-label">정수주 잔여자금</span><strong id="sumReserve" class="metric-value">$0</strong></div>
 </section>
 
-<section class="settings">
-  <div class="settings-title">기준 고점 설정</div>
-  <div class="sub">1번 엔진의 시작 고점만 바꾸면 E2~E5와 250개 매수/매도가가 같은 규칙으로 자동 재계산됩니다.</div>
-  <div class="settings-grid">
-    <div class="sbox">
-      <span class="metric-label">E1 기준 고점 ($)</span>
-      <input id="highPriceInput" type="number" inputmode="decimal" min="0.01" step="0.01" value="278">
-    </div>
-    <div class="sbox" style="display:flex;align-items:end">
-      <button class="btn btn-primary" id="applyHighBtn">고점 적용</button>
-    </div>
-    <div class="sbox">
-      <span class="metric-label">현재 적용 고점</span>
-      <div class="gvalue" id="currentHigh">$278.00</div>
-    </div>
+<section class="panel section">
+  <div class="section-title"><h2>전략 설정</h2><span style="font-size:11px;color:var(--muted)">입력 즉시 자동 계산 · 자동 저장</span></div>
+  <div class="form-grid">
+    <div class="field"><label for="currentCapital">현재 전략자금 ($)</label><input id="currentCapital" type="number" inputmode="decimal" min="1" step="100" value="80000"></div>
+    <div class="field"><label for="refHigh">E1 기준고점 ($)</label><input id="refHigh" type="number" inputmode="decimal" min="0.0001" step="0.0001" value="278"></div>
+    <div class="field"><label for="setsPerEngine">엔진당 세트 수</label><input id="setsPerEngine" type="number" inputmode="numeric" min="1" max="500" step="1" value="50"></div>
+    <div class="field"><label for="takeProfitPct">익절률 (%)</label><input id="takeProfitPct" type="number" inputmode="decimal" min="0" step="0.1" value="6"></div>
+    <div class="field wide"><label>세트당 목표금액</label><div class="amount-control">
+      <label class="check-label"><input id="autoSetAmount" type="checkbox" checked> 자동 계산</label>
+      <input id="manualSetAmount" type="number" inputmode="decimal" min="0" step="0.01" value="320" aria-label="직접 입력 세트당 목표금액">
+    </div></div>
+    <div class="field wide"><label for="totalRealizedProfit">누적 실현수익 직접 수정 ($)</label><input id="totalRealizedProfit" type="number" inputmode="decimal" step="0.01" value="0"></div>
+    <div class="field wide"><label for="profitToAdd">이번 실현수익 추가 ($)</label><div class="profit-add">
+      <input id="profitToAdd" type="number" inputmode="decimal" step="0.01" placeholder="예: 120 또는 -50">
+      <button id="addProfitBtn" class="btn green" type="button">수익 추가</button>
+    </div></div>
   </div>
-  <div class="rule">
-    엔진 시작가는 항상 <b>E1 = 입력값 / E2 = 50% / E3 = 25% / E4 = 12.5% / E5 = 6.25%</b>로 계산합니다.
-    각 엔진 안에서는 시작가 대비 -1%p씩 50세트 등차 매수합니다.
-  </div>
-</section>
-
-<section class="growth">
-  <div class="growth-title">실현수익 누적 & 자동 증액</div>
-  <div class="sub">이번에 실현된 수익만 입력하고 “수익 추가”를 누르면 누적됩니다.</div>
-
-  <div class="entry-grid">
-    <div class="gbox">
-      <span class="metric-label">이번 실현수익 추가 ($)</span>
-      <input id="profitAdd" type="number" inputmode="decimal" min="0" step="1" placeholder="예: 245.50">
+  <div class="growth">
+    <div class="growth-top">
+      <div id="growthStatus" class="growth-status">증액 진행 중</div>
+      <button id="applyRecommendedBtn" class="btn primary" type="button" disabled>권장 전략자금 적용</button>
     </div>
-    <div class="gbox" style="display:flex;align-items:end">
-      <button class="btn btn-primary" id="addProfitBtn">수익 추가</button>
+    <div class="growth-data">
+      <div class="growth-item"><span>다음 증액 기준</span><b id="nextGrowthThreshold">$8,000</b></div>
+      <div class="growth-item"><span>단계 진행</span><b id="growthProgressText">0%</b></div>
+      <div class="growth-item"><span>다음 권장 전략자금</span><b id="recommendedCapital">$88,000</b></div>
     </div>
-    <div class="gbox" style="display:flex;align-items:end">
-      <button class="btn btn-danger" id="resetBtn">누적수익 초기화</button>
-    </div>
-  </div>
-
-  <div class="status-grid">
-    <div class="gbox"><span class="metric-label">누적 실현수익</span><div class="gvalue" id="totalRealized">$0</div></div>
-    <div class="gbox"><span class="metric-label">다음 단계 누적 기준</span><div class="gvalue" id="cumulativeThreshold">$8,000</div></div>
-    <div class="gbox"><span class="metric-label">다음 단계까지</span><div class="gvalue" id="remainingProfit">$8,000</div></div>
-    <div class="gbox"><span class="metric-label">다음 전략자금</span><div class="gvalue" id="nextCapital">$88,000</div></div>
-  </div>
-
-  <div class="progress"><div id="progressBar"></div></div>
-  <div class="progress-text" id="progressText">0%</div>
-  <div class="flash" id="flashMsg"></div>
-</section>
-
-
-<section class="settings">
-  <div class="settings-title">백업 & 복원</div>
-  <div class="sub">현재 웹앱 설정과 누적 실현수익을 JSON 파일로 저장하거나 다시 불러올 수 있습니다.</div>
-  <div class="settings-grid">
-    <div class="sbox" style="display:flex;align-items:end">
-      <button class="btn btn-primary" id="backupBtn">백업 파일 저장</button>
-    </div>
-    <div class="sbox">
-      <span class="metric-label">백업 파일 선택</span>
-      <input id="restoreFile" type="file" accept=".json,application/json">
-    </div>
-    <div class="sbox" style="display:flex;align-items:end">
-      <button class="btn btn-primary" id="restoreBtn">백업 복원</button>
-    </div>
-  </div>
-  <div class="rule">
-    백업 파일에는 현재 <b>기준 고점, 누적 실현수익, 저장 시각, 전략 버전</b>이 포함됩니다.
-    다른 기기에서도 이 파일을 불러오면 같은 상태로 복원할 수 있습니다.
+    <div class="progress" aria-label="증액 진행률"><span id="growthProgressBar"></span></div>
   </div>
 </section>
 
-<input type="radio" name="engine" id="tab1" checked>
-<input type="radio" name="engine" id="tab2">
-<input type="radio" name="engine" id="tab3">
-<input type="radio" name="engine" id="tab4">
-<input type="radio" name="engine" id="tab5">
+<section class="panel section">
+  <div class="section-title"><h2>전체 배정 요약</h2><span id="allocationModeLabel" style="font-size:11px;color:var(--muted)">세트금액 자동</span></div>
+  <div class="calc-grid">
+    <div class="calc-item"><span>총 세트 수</span><b id="totalSetCount">250</b></div>
+    <div class="calc-item"><span>목표 총 배정액</span><b id="totalGoalAllocation">$80,000</b></div>
+    <div class="calc-item"><span>실제 정수주 총 배정액</span><b id="totalActualAllocation">$0</b></div>
+    <div class="calc-item"><span>전략자금 대비 차액</span><b id="capitalDifference">$0</b></div>
+  </div>
+  <p class="calc-note">정수주 잔여자금은 전체 전략표의 계산상 잔액이며, 증권계좌 예수금과는 다릅니다.</p>
+  <div id="budgetWarning" class="warning" role="alert"></div>
+</section>
 
-<div class="tabs">
-  <label for="tab1">E1</label><label for="tab2">E2</label><label for="tab3">E3</label><label for="tab4">E4</label><label for="tab5">E5</label>
-</div>
+<section class="panel section">
+  <div class="section-title"><h2>엔진별 매매표</h2><span style="font-size:11px;color:var(--muted)">한 번에 한 엔진 표시</span></div>
+  <nav id="engineTabs" class="engine-tabs" aria-label="엔진 선택"></nav>
+  <div class="engine-summary">
+    <div class="calc-item"><span>가격 범위</span><b id="engineRange">—</b></div>
+    <div class="calc-item"><span>세트 수</span><b id="engineSetCount">—</b></div>
+    <div class="calc-item"><span>세트당 목표금액</span><b id="engineSetAmount">—</b></div>
+    <div class="calc-item"><span>실제 정수주 배정액</span><b id="engineActualAllocation">—</b></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>세트번호</th><th>매수가</th><th>직전대비 하락률</th><th>목표 세트금액</th>
+        <th>정수주 매수수량</th><th>실제 매수금액</th><th>목표 매도가</th><th>예상이익</th>
+      </tr></thead>
+      <tbody id="engineRows"></tbody>
+    </table>
+  </div>
+  <div id="mobileRows" class="mobile-list"></div>
+</section>
 
-<div class="panels" id="panels"></div>
-
-<div class="note">
-  기본 세트금액 비중은 E1 $280 / E2 $280 / E3 $300 / E4 $340 / E5 $400입니다.
-  전략자금이 10% 증액될 때마다 이 비율도 같은 비율로 증가합니다.
-  기준 고점을 바꾸면 가격 구간과 정수주 수량은 새 가격 기준으로 자동 재계산됩니다.
-</div>
-
+<details class="advanced">
+  <summary>고급 설정 · JSON 백업 / 복원 / 초기화</summary>
+  <div class="advanced-body">
+    <div class="advanced-actions">
+      <button id="backupBtn" class="btn" type="button">JSON 백업</button>
+      <label class="btn" for="restoreFile" style="display:inline-flex;align-items:center">JSON 복원</label>
+      <input id="restoreFile" class="file-input" type="file" accept=".json,application/json">
+      <button id="resetProfitBtn" class="btn red" type="button">누적 실현수익 초기화</button>
+      <button id="resetAllBtn" class="btn red" type="button">전체 기본값 초기화</button>
+    </div>
+    <p class="advanced-note">데이터는 이 브라우저의 localStorage에 저장됩니다. 기기 간 동기화는 아직 연결되지 않았습니다. JSON 백업 파일을 안전한 곳에 보관하세요.</p>
+  </div>
+</details>
+<footer>실제 주문은 증권사 앱에서 직접 진행하세요. 이 페이지는 계산표이며 자동매매를 하지 않습니다.</footer>
 </div>
 
 <script>
-const BASE_CAPITAL = 80000;
-const BASE_BUDGETS = [280,280,300,340,400];
-const TP = 0.06;
-const PROFIT_KEY = 'sandwich_total_realized_v4';
-const HIGH_KEY = 'sandwich_high_price_v1';
-
-let memoryProfit = 0;
-let memoryHigh = 278;
-let storageAvailable = true;
-
-function money(n,d=0){
-  return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+(function(){
+"use strict";
+var STORAGE_KEY="sandwich-strategy-state-v1";
+var LEGACY_KEY="sandwich-v6-state";
+var ENGINE_COUNT=5;
+var DEFAULT_STATE={
+  version:1,
+  currentCapital:80000,
+  refHigh:278,
+  setsPerEngine:50,
+  takeProfitPct:6,
+  autoSetAmount:true,
+  manualSetAmount:320,
+  totalRealizedProfit:0,
+  growthBaseProfit:0,
+  selectedEngine:0
+};
+var state;
+var saveTimer=null;
+var money=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:0,maximumFractionDigits:2});
+var priceFmt=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:4});
+var qtyFmt=new Intl.NumberFormat("en-US",{maximumFractionDigits:0});
+function el(id){return document.getElementById(id)}
+function finitePositive(value,fallback){var n=Number(value);return Number.isFinite(n)&&n>0?n:fallback}
+function normalizeState(value){
+  var s=Object.assign({},DEFAULT_STATE,value||{});
+  s.currentCapital=finitePositive(s.currentCapital,DEFAULT_STATE.currentCapital);
+  s.refHigh=finitePositive(s.refHigh,DEFAULT_STATE.refHigh);
+  s.setsPerEngine=Math.max(1,Math.min(500,Math.floor(finitePositive(s.setsPerEngine,DEFAULT_STATE.setsPerEngine))));
+  s.takeProfitPct=Math.max(0,Number.isFinite(Number(s.takeProfitPct))?Number(s.takeProfitPct):DEFAULT_STATE.takeProfitPct);
+  s.autoSetAmount=Boolean(s.autoSetAmount);
+  s.manualSetAmount=Math.max(0,Number.isFinite(Number(s.manualSetAmount))?Number(s.manualSetAmount):DEFAULT_STATE.manualSetAmount);
+  s.totalRealizedProfit=Number.isFinite(Number(s.totalRealizedProfit))?Number(s.totalRealizedProfit):0;
+  s.growthBaseProfit=Number.isFinite(Number(s.growthBaseProfit))?Number(s.growthBaseProfit):s.totalRealizedProfit;
+  s.selectedEngine=Math.max(0,Math.min(ENGINE_COUNT-1,Math.floor(Number(s.selectedEngine)||0)));
+  s.version=1;
+  return s;
 }
-function testStorage(){
-  try{localStorage.setItem('__t','1');localStorage.removeItem('__t');storageAvailable=true;}
-  catch(e){storageAvailable=false;}
-}
-function getProfit(){
-  if(!storageAvailable)return memoryProfit;
-  try{const v=parseFloat(localStorage.getItem(PROFIT_KEY));return Number.isFinite(v)&&v>=0?v:0;}
-  catch(e){storageAvailable=false;return memoryProfit;}
-}
-function setProfit(v){
-  v=Math.max(0,Number(v)||0);memoryProfit=v;
-  if(storageAvailable){try{localStorage.setItem(PROFIT_KEY,String(v));}catch(e){storageAvailable=false;}}
-}
-function getHigh(){
-  if(!storageAvailable)return memoryHigh;
-  try{const v=parseFloat(localStorage.getItem(HIGH_KEY));return Number.isFinite(v)&&v>0?v:278;}
-  catch(e){storageAvailable=false;return memoryHigh;}
-}
-function setHigh(v){
-  v=Math.max(0.01,Number(v)||278);memoryHigh=v;
-  if(storageAvailable){try{localStorage.setItem(HIGH_KEY,String(v));}catch(e){storageAvailable=false;}}
-}
-function calcGrowth(totalRealized){
-  let capital=BASE_CAPITAL,consumed=0,steps=0;
-  while(steps<100){
-    const hurdle=capital*0.10;
-    if(totalRealized-consumed+1e-9>=hurdle){consumed+=hurdle;capital*=1.10;steps++;}
-    else break;
-  }
-  const currentHurdle=capital*0.10;
-  const carry=Math.max(0,totalRealized-consumed);
-  return {
-    capital,steps,carry,
-    remaining:Math.max(0,currentHurdle-carry),
-    cumulativeThreshold:consumed+currentHurdle,
-    nextCapital:capital*1.10,
-    progressPct:Math.min(100,carry/currentHurdle*100)
-  };
-}
-function engineStarts(high){
-  return [high,high/2,high/4,high/8,high/16];
-}
-function buildPanels(high,scale){
-  const starts=engineStarts(high);
-  let totalActual=0;
-  let allocHTML='';
-  let panelsHTML='';
-
-  starts.forEach((start,idx)=>{
-    const engine=idx+1;
-    const budget=BASE_BUDGETS[idx]*scale;
-    const nextBudget=budget*1.10;
-    const step=start*0.01;
-    let prev=start;
-    let engActual=0,engTarget=0,engProfit=0,rows='';
-
-    for(let s=1;s<=50;s++){
-      const buy=start-step*s;
-      const decline=(buy/prev-1)*100;
-      const qty=Math.max(1,Math.floor(budget/buy));
-      const actual=qty*buy;
-      const sell=buy*(1+TP);
-      const profit=actual*TP;
-      engActual+=actual; engTarget+=budget; engProfit+=profit; totalActual+=actual;
-
-      rows+=`<tr>
-        <td>${s}</td>
-        <td class="buy">${money(buy,4)}</td>
-        <td class="pct">${decline.toFixed(3)}%</td>
-        <td class="target">${money(budget)}</td>
-        <td class="qty">${qty}주</td>
-        <td>${money(actual,2)}</td>
-        <td class="sell">${money(sell,4)}</td>
-        <td class="profit">${money(profit,2)}</td>
-      </tr>`;
-      prev=buy;
+function migrateLegacy(){
+  try{
+    var old=JSON.parse(localStorage.getItem(LEGACY_KEY)||"null");
+    if(!old||!old.settings)return null;
+    var realized=Number(old.totalRealizedProfit);
+    if(!Number.isFinite(realized)&&Array.isArray(old.sets)){
+      realized=old.sets.reduce(function(sum,set){return sum+(Number(set.realizedGridPL)||0)},0);
     }
-
-    allocHTML+=`<div class="alloc-card">
-      <div class="alloc-title">E${engine}</div>
-      <div class="alloc-target">${money(budget)}</div>
-      <div class="alloc-next">다음 단계 ${money(nextBudget)}</div>
-      <div class="alloc-range">${money(start,2)} → ${money(start/2,2)}</div>
-    </div>`;
-
-    panelsHTML+=`<div class="panel panel-${engine}">
-      <div class="engine-head">
-        <div><div class="eyebrow">ENGINE ${engine}</div><h2>${money(start,4)} → ${money(start/2,4)}</h2></div>
-        <div class="engine-stats">
-          <div><span>현재 목표금액</span><strong>${money(budget)}</strong></div>
-          <div><span>엔진 실제투입</span><strong>${money(engActual)}</strong></div>
-          <div><span>남는 현금</span><strong>${money(engTarget-engActual)}</strong></div>
-          <div><span>1회전 예상이익</span><strong>${money(engProfit)}</strong></div>
-        </div>
-      </div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>세트</th><th>매수가</th><th>직전대비</th><th>목표금액</th><th>수량</th><th>실제매수</th><th>매도가 +6%</th><th>예상이익</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>
-    </div>`;
-  });
-
-  document.getElementById('allocGrid').innerHTML=allocHTML;
-  document.getElementById('panels').innerHTML=panelsHTML;
-  return totalActual;
+    if(!Number.isFinite(realized))realized=0;
+    return normalizeState({
+      currentCapital:old.settings.capital,
+      refHigh:old.settings.refHigh,
+      totalRealizedProfit:realized,
+      growthBaseProfit:realized,
+      autoSetAmount:true
+    });
+  }catch(error){return null}
 }
-function render(showFlash=false,oldSteps=null){
-  const realized=getProfit();
-  const high=getHigh();
-  const g=calcGrowth(realized);
-  const scale=g.capital/BASE_CAPITAL;
-  const totalActual=buildPanels(high,scale);
-  const reserve=g.capital-totalActual;
-
-  document.getElementById('currentCapital').textContent=money(g.capital);
-  document.getElementById('actualAllocated').textContent=money(totalActual);
-  document.getElementById('reserveCash').textContent=money(reserve);
-  document.getElementById('stepValue').textContent=g.steps+'단계';
-  document.getElementById('currentHigh').textContent=money(high,2);
-  document.getElementById('highPriceInput').value=high;
-
-  document.getElementById('totalRealized').textContent=money(realized,2);
-  document.getElementById('cumulativeThreshold').textContent=money(g.cumulativeThreshold);
-  document.getElementById('remainingProfit').textContent=money(g.remaining,2);
-  document.getElementById('nextCapital').textContent=money(g.nextCapital);
-  document.getElementById('progressBar').style.width=g.progressPct.toFixed(1)+'%';
-  document.getElementById('progressText').textContent=g.progressPct.toFixed(1)+'% · 현재 단계 이월수익 '+money(g.carry,2);
-
-  const flash=document.getElementById('flashMsg');
-  if(!storageAvailable){
-    flash.style.display='block';
-    flash.style.background='#fff7ed';flash.style.color='#9a3412';
-    flash.textContent='현재 미리보기에서는 저장이 제한될 수 있습니다. GitHub Pages에서는 고점과 누적수익이 자동 저장됩니다.';
-  }else if(showFlash&&oldSteps!==null&&g.steps>oldSteps){
-    flash.style.display='block';
-    flash.style.background='#ecfdf5';flash.style.color='#065f46';
-    flash.textContent=g.steps+'단계로 자동 증액되었습니다. 현재 전략자금은 '+money(g.capital)+'입니다.';
-    setTimeout(()=>flash.style.display='none',5000);
-  }else if(!showFlash){flash.style.display='none';}
+function loadState(){
+  try{
+    var saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    if(saved&&typeof saved==="object")return normalizeState(saved);
+  }catch(error){}
+  return migrateLegacy()||normalizeState(DEFAULT_STATE);
 }
-function addProfit(){
-  const inp=document.getElementById('profitAdd');
-  const add=Number(String(inp.value||'').replace(/,/g,'').trim());
-  if(!Number.isFinite(add)||add<=0){inp.focus();return;}
-  const before=calcGrowth(getProfit()).steps;
-  setProfit(getProfit()+add);
-  inp.value='';
-  render(true,before);
-}
-function applyHigh(){
-  const inp=document.getElementById('highPriceInput');
-  const v=Number(String(inp.value||'').replace(/,/g,'').trim());
-  if(!Number.isFinite(v)||v<=0){inp.focus();return;}
-  setHigh(v);
-  render(false);
-}
-
-function backupData(){
-  const data = {
-    version: "sandwich-v1",
-    savedAt: new Date().toISOString(),
-    highPrice: getHigh(),
-    totalRealizedProfit: getProfit()
-  };
-
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const dt = new Date();
-  const stamp =
-    dt.getFullYear().toString() +
-    String(dt.getMonth()+1).padStart(2,'0') +
-    String(dt.getDate()).padStart(2,'0') + '_' +
-    String(dt.getHours()).padStart(2,'0') +
-    String(dt.getMinutes()).padStart(2,'0');
-  a.href = url;
-  a.download = 'sandwich_backup_' + stamp + '.json';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
-}
-
-function restoreData(){
-  const input = document.getElementById('restoreFile');
-  const file = input.files && input.files[0];
-  if(!file){
-    input.focus();
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(){
+function saveState(){
+  window.clearTimeout(saveTimer);
+  el("saveState").textContent="● 저장 중";
+  el("saveState").classList.remove("error");
+  saveTimer=window.setTimeout(function(){
     try{
-      const data = JSON.parse(reader.result);
-
-      if(!data || typeof data !== 'object'){
-        throw new Error('invalid');
-      }
-
-      const high = Number(data.highPrice);
-      const profit = Number(data.totalRealizedProfit);
-
-      if(!Number.isFinite(high) || high <= 0){
-        throw new Error('bad high');
-      }
-      if(!Number.isFinite(profit) || profit < 0){
-        throw new Error('bad profit');
-      }
-
-      setHigh(high);
-      setProfit(profit);
-      document.getElementById('highPriceInput').value = high;
-      render(false);
-
-      const flash = document.getElementById('flashMsg');
-      flash.style.display='block';
-      flash.style.background='#ecfdf5';
-      flash.style.color='#065f46';
-      flash.textContent='백업 복원이 완료되었습니다.';
-      setTimeout(()=>flash.style.display='none',4000);
-    }catch(e){
-      alert('올바른 샌드위치 매매법 백업 파일이 아닙니다.');
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      el("saveState").textContent="● 저장됨";
+      el("saveState").classList.remove("error");
+    }catch(error){
+      el("saveState").textContent="● 저장 오류";
+      el("saveState").classList.add("error");
     }
+  },120);
+}
+function getDerivedState(){
+  var totalSets=ENGINE_COUNT*state.setsPerEngine;
+  var setAmount=state.autoSetAmount?state.currentCapital/totalSets:state.manualSetAmount;
+  var totalGoalAllocation=setAmount*totalSets;
+  var engines=[];
+  var totalActualAllocation=0;
+  for(var engineIndex=0;engineIndex<ENGINE_COUNT;engineIndex++){
+    var start=state.refHigh/Math.pow(2,engineIndex);
+    var rows=[];
+    var actual=0;
+    for(var i=0;i<state.setsPerEngine;i++){
+      var buyPrice=start*(1-(i+1)/(2*state.setsPerEngine));
+      var previousPrice=i===0?start:start*(1-i/(2*state.setsPerEngine));
+      var dropPct=(buyPrice/previousPrice-1)*100;
+      var quantity=buyPrice>0?Math.floor(setAmount/buyPrice):0;
+      var actualAmount=quantity*buyPrice;
+      var sellPrice=buyPrice*(1+state.takeProfitPct/100);
+      var expectedProfit=actualAmount*state.takeProfitPct/100;
+      rows.push({
+        number:i+1,
+        buyPrice:buyPrice,
+        previousDropPct:dropPct,
+        targetAmount:setAmount,
+        quantity:quantity,
+        actualAmount:actualAmount,
+        sellPrice:sellPrice,
+        expectedProfit:expectedProfit
+      });
+      actual+=actualAmount;
+    }
+    totalActualAllocation+=actual;
+    engines.push({index:engineIndex,start:start,end:start*0.5,rows:rows,actualAllocation:actual});
+  }
+  var nextGrowthThreshold=state.growthBaseProfit+state.currentCapital*0.10;
+  return{
+    currentCapital:state.currentCapital,
+    totalRealizedProfit:state.totalRealizedProfit,
+    growthBaseProfit:state.growthBaseProfit,
+    nextGrowthThreshold:nextGrowthThreshold,
+    recommendedCapital:state.currentCapital*1.10,
+    totalSets:totalSets,
+    setAmount:setAmount,
+    totalGoalAllocation:totalGoalAllocation,
+    totalActualAllocation:totalActualAllocation,
+    capitalDifference:state.currentCapital-totalGoalAllocation,
+    integerShareReserve:state.currentCapital-totalActualAllocation,
+    engines:engines
   };
-  reader.readAsText(file);
 }
+function text(id,value){el(id).textContent=value}
+function updateForm(){
+  el("currentCapital").value=state.currentCapital;
+  el("refHigh").value=state.refHigh;
+  el("setsPerEngine").value=state.setsPerEngine;
+  el("takeProfitPct").value=state.takeProfitPct;
+  el("autoSetAmount").checked=state.autoSetAmount;
+  el("manualSetAmount").value=state.manualSetAmount;
+  el("manualSetAmount").disabled=state.autoSetAmount;
+  el("totalRealizedProfit").value=state.totalRealizedProfit;
+}
+function renderTabs(){
+  var nav=el("engineTabs");
+  nav.textContent="";
+  for(var i=0;i<ENGINE_COUNT;i++){
+    var button=document.createElement("button");
+    button.type="button";
+    button.className="engine-tab"+(state.selectedEngine===i?" active":"");
+    button.textContent="E"+(i+1);
+    button.setAttribute("aria-pressed",state.selectedEngine===i?"true":"false");
+    button.setAttribute("data-engine",String(i));
+    nav.appendChild(button);
+  }
+}
+function addTableCell(row,value,className){
+  var td=document.createElement("td");
+  td.textContent=value;
+  if(className)td.className=className;
+  row.appendChild(td);
+}
+function addMobileValue(parent,label,value,className){
+  var box=document.createElement("div");
+  box.className="set-value"+(className?" "+className:"");
+  var name=document.createElement("span");name.textContent=label;
+  var val=document.createElement("b");val.textContent=value;
+  box.appendChild(name);box.appendChild(val);parent.appendChild(box);
+}
+function renderEngine(){
+  var data=getDerivedState();
+  var engine=data.engines[state.selectedEngine];
+  var tbody=el("engineRows");
+  var mobile=el("mobileRows");
+  tbody.textContent="";
+  mobile.textContent="";
+  text("engineRange",priceFmt.format(engine.start)+" → "+priceFmt.format(engine.end));
+  text("engineSetCount",String(state.setsPerEngine));
+  text("engineSetAmount",money.format(data.setAmount));
+  text("engineActualAllocation",money.format(engine.actualAllocation));
+  engine.rows.forEach(function(r){
+    var tr=document.createElement("tr");
+    addTableCell(tr,"E"+(state.selectedEngine+1)+"-"+String(r.number).padStart(2,"0"));
+    addTableCell(tr,priceFmt.format(r.buyPrice),"buy");
+    addTableCell(tr,r.previousDropPct.toFixed(2)+"%");
+    addTableCell(tr,money.format(r.targetAmount));
+    addTableCell(tr,r.quantity===0?"0주":qtyFmt.format(r.quantity)+"주",r.quantity===0?"unavailable":"qty");
+    addTableCell(tr,money.format(r.actualAmount),"actual");
+    addTableCell(tr,priceFmt.format(r.sellPrice),"sell");
+    addTableCell(tr,money.format(r.expectedProfit),"profit");
+    tbody.appendChild(tr);
 
-function init(){
-  testStorage();
-  document.getElementById('addProfitBtn').addEventListener('click',addProfit);
-  document.getElementById('applyHighBtn').addEventListener('click',applyHigh);
-  document.getElementById('resetBtn').addEventListener('click',()=>{setProfit(0);render(false);});
-  document.getElementById('backupBtn').addEventListener('click',backupData);
-  document.getElementById('restoreBtn').addEventListener('click',restoreData);
-  document.getElementById('profitAdd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addProfit();}});
-  document.getElementById('highPriceInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyHigh();}});
-  render(false);
+    var card=document.createElement("article");
+    card.className="set-card";
+    var head=document.createElement("div");head.className="set-head";
+    var title=document.createElement("span");title.textContent="E"+(state.selectedEngine+1)+"-"+String(r.number).padStart(2,"0");
+    var drop=document.createElement("small");drop.textContent="직전 대비 "+r.previousDropPct.toFixed(2)+"%";
+    head.appendChild(title);head.appendChild(drop);card.appendChild(head);
+    var main=document.createElement("div");main.className="set-main";
+    addMobileValue(main,"매수가",priceFmt.format(r.buyPrice),"main-buy");
+    addMobileValue(main,"정수주 수량",r.quantity===0?"0주 / 매수불가":qtyFmt.format(r.quantity)+"주","");
+    addMobileValue(main,"실제 매수금액",money.format(r.actualAmount),"");
+    addMobileValue(main,"목표 매도가",priceFmt.format(r.sellPrice),"main-sell");
+    card.appendChild(main);
+    var extra=document.createElement("div");extra.className="set-extra";
+    addMobileValue(extra,"목표 세트금액",money.format(r.targetAmount),"");
+    addMobileValue(extra,"예상이익",money.format(r.expectedProfit),"");
+    card.appendChild(extra);
+    mobile.appendChild(card);
+  });
+  document.querySelectorAll(".engine-tab").forEach(function(button){
+    button.onclick=function(){
+      state.selectedEngine=Number(button.getAttribute("data-engine"));
+      renderTabs();
+      renderEngine();
+      saveState();
+    };
+  });
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+function render(){
+  var d=getDerivedState();
+  text("sumCapital",money.format(d.currentCapital));
+  text("sumSetAmount",money.format(d.setAmount));
+  text("sumProfit",money.format(d.totalRealizedProfit));
+  text("sumReserve",money.format(d.integerShareReserve));
+  el("sumProfit").classList.toggle("profit",d.totalRealizedProfit>=0);
+  text("totalSetCount",qtyFmt.format(d.totalSets));
+  text("totalGoalAllocation",money.format(d.totalGoalAllocation));
+  text("totalActualAllocation",money.format(d.totalActualAllocation));
+  text("capitalDifference",money.format(d.capitalDifference));
+  el("capitalDifference").style.color=d.capitalDifference<0?"var(--red)":"var(--ink)";
+  text("allocationModeLabel",state.autoSetAmount?"세트금액 자동":"세트금액 직접 입력");
+  var warning=el("budgetWarning");
+  if(d.totalGoalAllocation>d.currentCapital+0.000001){
+    warning.textContent="현재 전략자금보다 "+money.format(d.totalGoalAllocation-d.currentCapital)+" 많습니다.";
+    warning.classList.add("show");
+  }else{
+    warning.textContent="";
+    warning.classList.remove("show");
+  }
+  var remaining=d.nextGrowthThreshold-d.totalRealizedProfit;
+  var ready=d.totalRealizedProfit>=d.nextGrowthThreshold;
+  text("growthStatus",ready?"증액 가능":"증액까지 "+money.format(Math.max(0,remaining))+" 남음");
+  text("nextGrowthThreshold",money.format(d.nextGrowthThreshold));
+  text("recommendedCapital",money.format(d.recommendedCapital));
+  var stageSize=Math.max(0.01,d.nextGrowthThreshold-d.growthBaseProfit);
+  var progress=Math.max(0,Math.min(100,(d.totalRealizedProfit-d.growthBaseProfit)/stageSize*100));
+  text("growthProgressText",progress.toFixed(1)+"%");
+  el("growthProgressBar").style.width=progress+"%";
+  el("applyRecommendedBtn").disabled=!ready;
+  el("manualSetAmount").disabled=state.autoSetAmount;
+  renderTabs();
+  renderEngine();
+}
+function setNumberFromInput(id,key,minimum,integer,capitalEdit){
+  var input=el(id);
+  input.addEventListener("input",function(){
+    if(input.value==="")return;
+    var value=Number(input.value);
+    if(!Number.isFinite(value)||value<minimum||(integer&&!Number.isInteger(value)))return;
+    if(capitalEdit&&value!==state.currentCapital)state.growthBaseProfit=state.totalRealizedProfit;
+    state[key]=value;
+    if(key==="setsPerEngine")state[key]=Math.min(500,Math.floor(value));
+    render();
+    saveState();
+  });
+  input.addEventListener("blur",function(){updateForm()});
+}
+function bindControls(){
+  setNumberFromInput("currentCapital","currentCapital",1,false,true);
+  setNumberFromInput("refHigh","refHigh",0.0001,false,false);
+  setNumberFromInput("setsPerEngine","setsPerEngine",1,true,false);
+  setNumberFromInput("takeProfitPct","takeProfitPct",0,false,false);
+  setNumberFromInput("manualSetAmount","manualSetAmount",0,false,false);
+  el("autoSetAmount").addEventListener("change",function(){
+    state.autoSetAmount=el("autoSetAmount").checked;updateForm();render();saveState();
+  });
+  el("totalRealizedProfit").addEventListener("input",function(){
+    if(el("totalRealizedProfit").value==="")return;
+    var value=Number(el("totalRealizedProfit").value);
+    if(!Number.isFinite(value))return;
+    state.totalRealizedProfit=value;render();saveState();
+  });
+  el("totalRealizedProfit").addEventListener("blur",updateForm);
+  el("addProfitBtn").addEventListener("click",function(){
+    var input=el("profitToAdd");
+    var value=Number(input.value);
+    if(input.value===""||!Number.isFinite(value))return;
+    state.totalRealizedProfit+=value;
+    input.value="";
+    updateForm();render();saveState();
+  });
+  el("applyRecommendedBtn").addEventListener("click",function(){
+    var d=getDerivedState();
+    if(d.totalRealizedProfit<d.nextGrowthThreshold)return;
+    state.currentCapital=d.recommendedCapital;
+    state.growthBaseProfit=d.nextGrowthThreshold;
+    updateForm();render();saveState();
+  });
+  el("backupBtn").addEventListener("click",function(){
+    var backup={app:"sandwich-trading-sheet",version:1,exportedAt:new Date().toISOString(),state:state};
+    var blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var link=document.createElement("a");
+    link.href=url;link.download="sandwich-trading-backup-"+new Date().toISOString().slice(0,10)+".json";
+    link.click();URL.revokeObjectURL(url);
+  });
+  el("restoreFile").addEventListener("change",function(event){
+    var file=event.target.files&&event.target.files[0];
+    if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(){
+      try{
+        var parsed=JSON.parse(String(reader.result));
+        var restored=normalizeState(parsed.state||parsed);
+        if(!window.confirm("현재 저장된 설정과 실현수익을 백업 파일의 내용으로 바꿀까요?"))return;
+        state=restored;updateForm();render();saveState();
+      }catch(error){window.alert("올바른 JSON 백업 파일이 아닙니다.")}
+      finally{event.target.value=""}
+    };
+    reader.onerror=function(){window.alert("파일을 읽지 못했습니다.");event.target.value=""};
+    reader.readAsText(file);
+  });
+  el("resetProfitBtn").addEventListener("click",function(){
+    if(!window.confirm("누적 실현수익을 정말 0으로 초기화할까요?"))return;
+    state.totalRealizedProfit=0;state.growthBaseProfit=0;
+    updateForm();render();saveState();
+  });
+  el("resetAllBtn").addEventListener("click",function(){
+    if(!window.confirm("전체 전략 기본값으로 초기화할까요? 저장된 전략자금과 실현수익이 기본값으로 바뀝니다."))return;
+    localStorage.removeItem(LEGACY_KEY);
+    state=normalizeState(DEFAULT_STATE);updateForm();render();saveState();
+  });
+}
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.getRegistrations().then(function(registrations){
+      var appPath=new URL(".",window.location.href).href;
+      registrations.forEach(function(registration){if(registration.scope.indexOf(appPath)===0)registration.unregister()});
+    }).catch(function(){});
+  });
+}
+state=loadState();
+updateForm();
+bindControls();
+render();
+saveState();
+})();
 </script>
 </body>
 </html>
